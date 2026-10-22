@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
-| Date         : Thu Oct 22 07:36:37 2026
+| Date         : Thu Oct 22 08:29:31 2026
 | Host         : Batu running 64-bit major release  (build 9200)
 | Command      : report_utilization -hierarchical -hierarchical_depth 4 -file D:/fpga-video/hw/reports/utilization_hier.txt
 | Design       : system_wrapper
@@ -22,23 +22,23 @@ Table of Contents
 +--------------------------------------------------------+--------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------------+
 |                        Instance                        |                      Module                      | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs  | RAMB36 | RAMB18 | DSP Blocks |
 +--------------------------------------------------------+--------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------------+
-| system_wrapper                                         |                                            (top) |      13609 |      11001 |    2298 |  310 | 14053 |     70 |     68 |          0 |
+| system_wrapper                                         |                                            (top) |      13328 |      10691 |    2322 |  315 | 14426 |     70 |     68 |          0 |
 |   (system_wrapper)                                     |                                            (top) |          0 |          0 |       0 |    0 |     0 |      0 |      0 |          0 |
-|   system_i                                             |                                           system |      13609 |      11001 |    2298 |  310 | 14053 |     70 |     68 |          0 |
+|   system_i                                             |                                           system |      13328 |      10691 |    2322 |  315 | 14426 |     70 |     68 |          0 |
 |     vtc                                                |                                     system_vtc_0 |         79 |         79 |       0 |    0 |   128 |      0 |      0 |          0 |
 |       U0                                               |                                system_vtc_0_v_tc |         79 |         79 |       0 |    0 |   128 |      0 |      0 |          0 |
 |         U_TC_TOP                                       |                              system_vtc_0_tc_top |         79 |         79 |       0 |    0 |   128 |      0 |      0 |          0 |
-|     dma                                                |                                     system_dma_0 |       1563 |       1447 |       8 |  108 |  2175 |      2 |      2 |          0 |
-|       U0                                               |                             system_dma_0_axi_dma |       1563 |       1447 |       8 |  108 |  2175 |      2 |      2 |          0 |
+|     dma                                                |                                     system_dma_0 |       1572 |       1456 |       8 |  108 |  2242 |      2 |      2 |          0 |
+|       U0                                               |                             system_dma_0_axi_dma |       1572 |       1456 |       8 |  108 |  2242 |      2 |      2 |          0 |
 |         INCLUDE_MM2S_SOF_EOF_GENERATOR.I_MM2S_DMA_MNGR |                   system_dma_0_axi_dma_mm2s_mngr |         19 |         19 |       0 |    0 |    73 |      0 |      0 |          0 |
 |         INCLUDE_S2MM_SOF_EOF_GENERATOR.I_S2MM_DMA_MNGR |                   system_dma_0_axi_dma_s2mm_mngr |         31 |         31 |       0 |    0 |    98 |      0 |      0 |          0 |
 |         I_AXI_DMA_REG_MODULE                           |                  system_dma_0_axi_dma_reg_module |        137 |        137 |       0 |    0 |   259 |      0 |      0 |          0 |
-|         I_PRMRY_DATAMOVER                              |                       system_dma_0_axi_datamover |       1359 |       1243 |       8 |  108 |  1707 |      2 |      2 |          0 |
+|         I_PRMRY_DATAMOVER                              |                       system_dma_0_axi_datamover |       1367 |       1251 |       8 |  108 |  1774 |      2 |      2 |          0 |
 |     gpio                                               |                                    system_gpio_0 |         41 |         41 |       0 |    0 |    52 |      0 |      0 |          0 |
 |       U0                                               |                           system_gpio_0_axi_gpio |         41 |         41 |       0 |    0 |    52 |      0 |      0 |          0 |
-|     ic_ctrl                                            |                                 system_ic_ctrl_0 |        849 |        848 |       0 |    1 |   893 |      0 |      0 |          0 |
-|       inst                                             |                         system_ic_ctrl_0_bd_1315 |        849 |        848 |       0 |    1 |   893 |      0 |      0 |          0 |
-|         s00_entry_pipeline                             |  system_ic_ctrl_0_s00_entry_pipeline_imp_1CDUSLA |        430 |        430 |       0 |    0 |   448 |      0 |      0 |          0 |
+|     ic_ctrl                                            |                                 system_ic_ctrl_0 |        853 |        852 |       0 |    1 |   893 |      0 |      0 |          0 |
+|       inst                                             |                         system_ic_ctrl_0_bd_1315 |        853 |        852 |       0 |    1 |   893 |      0 |      0 |          0 |
+|         s00_entry_pipeline                             |  system_ic_ctrl_0_s00_entry_pipeline_imp_1CDUSLA |        433 |        433 |       0 |    0 |   448 |      0 |      0 |          0 |
 |         switchboards                                   |        system_ic_ctrl_0_switchboards_imp_1LRHP9S |        215 |        215 |       0 |    0 |   209 |      0 |      0 |          0 |
 |     ic_mem                                             |                                  system_ic_mem_0 |       2626 |       2101 |     506 |   19 |  3689 |      0 |      0 |          0 |
 |       inst                                             |                          system_ic_mem_0_bd_7203 |       2626 |       2101 |     506 |   19 |  3689 |      0 |      0 |          0 |
@@ -46,32 +46,32 @@ Table of Contents
 |         m00_nodes                                      |            system_ic_mem_0_m00_nodes_imp_1B2UDFY |        602 |        401 |     200 |    1 |   581 |      0 |      0 |          0 |
 |         s00_entry_pipeline                             |    system_ic_mem_0_s00_entry_pipeline_imp_Y1ICGX |        184 |        184 |       0 |    0 |   346 |      0 |      0 |          0 |
 |         s00_nodes                                      |             system_ic_mem_0_s00_nodes_imp_UT3V7F |        241 |        141 |     100 |    0 |   241 |      0 |      0 |          0 |
-|         s01_entry_pipeline                             |   system_ic_mem_0_s01_entry_pipeline_imp_1QN3CS5 |        190 |        187 |       0 |    3 |   383 |      0 |      0 |          0 |
-|         s01_nodes                                      |            system_ic_mem_0_s01_nodes_imp_1V5JC25 |        322 |        216 |     106 |    0 |   299 |      0 |      0 |          0 |
+|         s01_entry_pipeline                             |   system_ic_mem_0_s01_entry_pipeline_imp_1QN3CS5 |        191 |        188 |       0 |    3 |   383 |      0 |      0 |          0 |
+|         s01_nodes                                      |            system_ic_mem_0_s01_nodes_imp_1V5JC25 |        324 |        218 |     106 |    0 |   299 |      0 |      0 |          0 |
 |         s02_entry_pipeline                             |   system_ic_mem_0_s02_entry_pipeline_imp_15XT07C |        181 |        181 |       0 |    0 |   342 |      0 |      0 |          0 |
 |         s02_nodes                                      |            system_ic_mem_0_s02_nodes_imp_13IGCGM |        241 |        141 |     100 |    0 |   241 |      0 |      0 |          0 |
 |         switchboards                                   |          system_ic_mem_0_switchboards_imp_1DW69B |         41 |         41 |       0 |    0 |   280 |      0 |      0 |          0 |
-|     iic_hdmi                                           |                                system_iic_hdmi_0 |        382 |        372 |       0 |   10 |   385 |      0 |      0 |          0 |
-|       U0                                               |                        system_iic_hdmi_0_axi_iic |        382 |        372 |       0 |   10 |   385 |      0 |      0 |          0 |
-|         X_IIC                                          |                            system_iic_hdmi_0_iic |        382 |        372 |       0 |   10 |   385 |      0 |      0 |          0 |
+|     iic_hdmi                                           |                                system_iic_hdmi_0 |        385 |        375 |       0 |   10 |   385 |      0 |      0 |          0 |
+|       U0                                               |                        system_iic_hdmi_0_axi_iic |        385 |        375 |       0 |   10 |   385 |      0 |      0 |          0 |
+|         X_IIC                                          |                            system_iic_hdmi_0_iic |        385 |        375 |       0 |   10 |   385 |      0 |      0 |          0 |
 |     upscale                                            |                                 system_upscale_0 |        638 |        198 |     440 |    0 |   149 |      0 |      0 |          0 |
 |       inst                                             |                     system_upscale_0_upscale_axi |        638 |        198 |     440 |    0 |   149 |      0 |      0 |          0 |
 |         u                                              |                       system_upscale_0_upscale2x |        637 |        197 |     440 |    0 |   148 |      0 |      0 |          0 |
-|     vdma                                               |                                    system_vdma_0 |        931 |        869 |       0 |   62 |  1313 |      1 |      1 |          0 |
-|       U0                                               |                           system_vdma_0_axi_vdma |        931 |        869 |       0 |   62 |  1313 |      1 |      1 |          0 |
-|         AXI_LITE_REG_INTERFACE_I                       |                    system_vdma_0_axi_vdma_reg_if |        161 |        159 |       0 |    2 |   227 |      0 |      0 |          0 |
+|     vdma                                               |                                    system_vdma_0 |        932 |        870 |       0 |   62 |  1313 |      1 |      1 |          0 |
+|       U0                                               |                           system_vdma_0_axi_vdma |        932 |        870 |       0 |   62 |  1313 |      1 |      1 |          0 |
+|         AXI_LITE_REG_INTERFACE_I                       |                    system_vdma_0_axi_vdma_reg_if |        163 |        161 |       0 |    2 |   227 |      0 |      0 |          0 |
 |         GEN_SPRT_FOR_MM2S.ADDR32.I_MM2S_DMA_MNGR       |                      system_vdma_0_axi_vdma_mngr |        166 |        166 |       0 |    0 |   337 |      0 |      0 |          0 |
 |         GEN_SPRT_FOR_MM2S.MM2S_LINEBUFFER_I            |              system_vdma_0_axi_vdma_mm2s_linebuf |         96 |         96 |       0 |    0 |   110 |      0 |      1 |          0 |
 |         GEN_SPRT_FOR_MM2S.MM2S_REGISTER_MODULE_I       |                system_vdma_0_axi_vdma_reg_module |         40 |         40 |       0 |    0 |   195 |      0 |      0 |          0 |
-|         I_PRMRY_DATAMOVER                              |                      system_vdma_0_axi_datamover |        388 |        328 |       0 |   60 |   326 |      1 |      0 |          0 |
+|         I_PRMRY_DATAMOVER                              |                      system_vdma_0_axi_datamover |        387 |        327 |       0 |   60 |   326 |      1 |      0 |          0 |
 |         I_RST_MODULE                                   |                system_vdma_0_axi_vdma_rst_module |         42 |         42 |       0 |    0 |    83 |      0 |      0 |          0 |
 |     vid_out                                            |                                 system_vid_out_0 |        268 |        268 |       0 |    0 |   579 |      2 |      1 |          0 |
 |       inst                                             |         system_vid_out_0_v_axi4s_vid_out_v4_0_20 |        268 |        268 |       0 |    0 |   579 |      2 |      1 |          0 |
 |         SYNC_INST                                      |    system_vid_out_0_v_axi4s_vid_out_v4_0_20_sync |         70 |         70 |       0 |    0 |    83 |      0 |      0 |          0 |
 |         COUPLER_INST                                   | system_vid_out_0_v_axi4s_vid_out_v4_0_20_coupler |        197 |        197 |       0 |    0 |   468 |      2 |      1 |          0 |
-|     vproc                                              |                                   system_vproc_0 |       6197 |       4745 |    1344 |  108 |  4613 |     65 |     64 |          0 |
-|       inst                                             |                         system_vproc_0_vproc_axi |       6197 |       4745 |    1344 |  108 |  4613 |     65 |     64 |          0 |
-|         u_top                                          |                         system_vproc_0_vproc_top |       6174 |       4722 |    1344 |  108 |  4603 |     65 |     64 |          0 |
+|     vproc                                              |                                   system_vproc_0 |       5897 |       4416 |    1368 |  113 |  4919 |     65 |     64 |          0 |
+|       inst                                             |                         system_vproc_0_vproc_axi |       5897 |       4416 |    1368 |  113 |  4919 |     65 |     64 |          0 |
+|         u_top                                          |                         system_vproc_0_vproc_top |       5876 |       4395 |    1368 |  113 |  4912 |     65 |     64 |          0 |
 +--------------------------------------------------------+--------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------------+
 * Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
 

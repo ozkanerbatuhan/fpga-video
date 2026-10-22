@@ -63,7 +63,7 @@ set aresetn [get_bd_pins rst_proc/peripheral_aresetn]
 set dma [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma dma]
 set_property -dict [list \
     CONFIG.c_include_sg {0} \
-    CONFIG.c_sg_length_width {23} \
+    CONFIG.c_sg_length_width {20} \
     CONFIG.c_m_axis_mm2s_tdata_width {16} \
     CONFIG.c_s_axis_s2mm_tdata_width {16} \
     CONFIG.c_m_axi_mm2s_data_width {64} \

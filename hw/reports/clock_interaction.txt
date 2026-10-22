@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
-| Date         : Thu Oct 22 07:36:46 2026
+| Date         : Thu Oct 22 08:29:39 2026
 | Host         : Batu running 64-bit major release  (build 9200)
 | Command      : report_clock_interaction -file D:/fpga-video/hw/reports/clock_interaction.txt
 | Design       : system_wrapper
@@ -15,12 +15,12 @@ Clock Interaction Report
 Clock Interaction Table
 -----------------------
 
-                                                              WNS                             TNS Failing  TNS Total    WNS Path         Clock-Pair           Inter-Clock              
-From Clock                     To Clock                       Clock Edges  WNS(ns)   TNS(ns)    Endpoints    Endpoints  Requirement(ns)  Classification       Constraints              
------------------------------  -----------------------------  -----------  -------  --------  -----------  -----------  ---------------  -------------------  -----------------------  
-clk_out1_system_clk_wiz_0      clk_out1_system_clk_wiz_0      rise - rise    -1.84  -2692.37         3419        58007             6.73  Clean                Partial False Path       
-clk_out1_system_clk_wiz_0      clk_out2_system_clk_wiz_0      rise - rise     4.94      0.00            0           31             6.73  Ignored              Max Delay Datapath Only  
-clk_out2_system_clk_wiz_0      clk_out1_system_clk_wiz_0      rise - rise    11.99      0.00            0           27            13.47  Ignored              Max Delay Datapath Only  
-clk_out2_system_clk_wiz_0      clk_out2_system_clk_wiz_0      rise - rise     5.85      0.00            0         1008            13.47  Clean                Timed                    
+                                                              WNS                            TNS Failing  TNS Total    WNS Path         Clock-Pair           Inter-Clock              
+From Clock                     To Clock                       Clock Edges  WNS(ns)  TNS(ns)    Endpoints    Endpoints  Requirement(ns)  Classification       Constraints              
+-----------------------------  -----------------------------  -----------  -------  -------  -----------  -----------  ---------------  -------------------  -----------------------  
+clk_out1_system_clk_wiz_0      clk_out1_system_clk_wiz_0      rise - rise    -0.76   -15.08           62        58777             6.73  Clean                Partial False Path       
+clk_out1_system_clk_wiz_0      clk_out2_system_clk_wiz_0      rise - rise     5.38     0.00            0           31             6.73  Ignored              Max Delay Datapath Only  
+clk_out2_system_clk_wiz_0      clk_out1_system_clk_wiz_0      rise - rise    11.81     0.00            0           27            13.47  Ignored              Max Delay Datapath Only  
+clk_out2_system_clk_wiz_0      clk_out2_system_clk_wiz_0      rise - rise     5.58     0.00            0         1008            13.47  Clean                Timed                    
 
 

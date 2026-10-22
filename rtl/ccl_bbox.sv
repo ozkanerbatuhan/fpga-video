@@ -54,8 +54,8 @@ module ccl_bbox #(
     localparam int BW   = 11*4 + 18;
     localparam int XW   = $clog2(MAX_W);
 
-    typedef enum logic [3:0] {
-        S_PIX, S_FIND_A, S_FIND_B, S_RD, S_RD2, S_UPD, S_MRG_HI, S_MRG_LO, S_MRG_W, S_MRG_UPD,
+    typedef enum logic [4:0] {
+        S_PIX, S_DEC, S_FIND_A, S_FIND_B, S_RD, S_RD2, S_UPD, S_MRG_HI, S_MRG_LO, S_MRG_W, S_MRG_UPD,
         S_SCAN0, S_SCAN_RD, S_SCAN_W, S_SCAN_CHK, S_SCAN_INS, S_PUB
     } state_t;
     state_t st;
@@ -68,7 +68,9 @@ module ccl_bbox #(
     logic          lb_we,  par_we,  bb_we, bb_re;
     logic [XW-1:0] lb_wa;
     logic [LW-1:0] lb_wd, par_wa, par_wd, bb_wa, bb_ra;
-    logic [BW-1:0] bb_wd, bb_q, bb_d;
+    logic [BW-1:0] bb_wd, bb_q, bb_d, bb_wd_r;
+    logic          bb_we_r;
+    logic [LW-1:0] bb_wa_r;
 
     // LUTRAM writes land one cycle late (registered port): every read of the
     // same entry happens at least two cycles after the write is requested.
@@ -80,7 +82,8 @@ module ccl_bbox #(
         par_we_r <= par_we; par_wa_r <= par_wa; par_wd_r <= par_wd;
         if (lb_we_r)  lb[lb_wa_r]   <= lb_wd_r;
         if (par_we_r) par[par_wa_r] <= par_wd_r;
-        if (bb_we)  bbt[bb_wa]  <= bb_wd;
+        bb_we_r <= bb_we; bb_wa_r <= bb_wa; bb_wd_r <= bb_wd;
+        if (bb_we_r) bbt[bb_wa_r] <= bb_wd_r;
         if (bb_re)  bb_q        <= bbt[bb_ra];
         bb_d <= bb_q;                       // output register (absorbed into the BRAM)
     end
@@ -109,9 +112,10 @@ module ccl_bbox #(
     wire [LW-1:0] n_ul = (!row0 && !col0) ? saved_u : '0;
     wire [LW-1:0] n_l  = !col0 ? left_r : '0;
 
-    wire [LW-1:0] lft = (n_l != 0) ? n_l : n_ul;
-    wire [LW-1:0] a0  = (n_u != 0) ? n_u : ((n_ur != 0) ? n_ur : lft);
-    wire [LW-1:0] b0  = (n_u != 0) ? '0  : ((n_ur != 0) ? lft  : '0);
+    logic [LW-1:0] nu_r, nur_r, nul_r, nl_r;     // neighbours of the current foreground pixel
+    wire [LW-1:0] lft = (nl_r != 0) ? nl_r : nul_r;
+    wire [LW-1:0] a0  = (nu_r != 0) ? nu_r : ((nur_r != 0) ? nur_r : lft);
+    wire [LW-1:0] b0  = (nu_r != 0) ? '0   : ((nur_r != 0) ? lft   : '0);
 
     // ---------------- pass-through ----------------
     logic skid_ready;
@@ -204,7 +208,7 @@ module ccl_bbox #(
             S_MRG_LO:  bb_re = 1'b1;
             S_MRG_UPD: begin
                 lb_we = 1'b1;
-                bb_we = 1'b1; bb_wd = bb_union(bb_union(bb_d, bb_hi), pix_bb);
+                bb_we = 1'b1; bb_wd = bb_union(bb_d, bb_hi);      // bb_hi already holds hi + pixel
             end
             S_SCAN_RD: begin bb_re = 1'b1; bb_ra = scan_l[LW-1:0]; end
             default: ;
@@ -263,12 +267,17 @@ module ccl_bbox #(
                     saved_u <= n_u;
                     if (eof) st <= S_SCAN0;
                 end else begin
-                    ca <= a0;
-                    cb <= b0;
-                    rf <= a0;
-                    pv <= 1'b0;
-                    st <= (a0 == 0) ? S_UPD : S_FIND_A;
+                    nu_r <= n_u; nur_r <= n_ur; nul_r <= n_ul; nl_r <= n_l;
+                    st <= S_DEC;
                 end
+            end
+
+            S_DEC: begin                    // neighbours registered: pick the two candidates
+                ca <= a0;
+                cb <= b0;
+                rf <= a0;
+                pv <= 1'b0;
+                st <= (a0 == 0) ? S_UPD : S_FIND_A;
             end
 
             // par_q follows par[rf] one cycle late: pv marks it valid
@@ -311,7 +320,7 @@ module ccl_bbox #(
             S_MRG_HI: st <= S_MRG_LO;       // read bbt[hi]
             S_MRG_LO: st <= S_MRG_W;        // read bbt[lo]
             S_MRG_W: begin                  // bb_d = bbt[hi]
-                bb_hi <= bb_d;
+                bb_hi <= bb_union(bb_d, pix_bb);
                 st <= S_MRG_UPD;            // next cycle bb_d = bbt[lo]
             end
             S_MRG_UPD: ;
