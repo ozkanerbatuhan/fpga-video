@@ -132,10 +132,13 @@ def main():
     ap.add_argument("--verify", action="store_true", help="compare boxes with the golden model")
     ap.add_argument("--log", default=None)
     ap.add_argument("--board", default="192.168.1.10")
+    ap.add_argument("--bind", default=None, help="local IP of the NIC wired to the board, e.g. 192.168.1.100")
     a = ap.parse_args()
     BOARD[0] = a.board
 
     tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    if a.bind:
+        tx.bind((a.bind, 0))          # pick the Ethernet NIC (Wi-Fi may share the subnet)
     tx.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 4 << 20)
     rx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     rx.bind(("0.0.0.0", 5002))

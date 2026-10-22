@@ -77,7 +77,38 @@ board reports for every frame with the model.
 
 ## Results
 
-<!-- RESULTS -->
+### Implementation (XC7Z020-1, Vivado 2025.2, `hw/reports/`)
+
+| | |
+|---|---|
+| Processing clock | 148.5 MHz (the 1080p60 pixel rate), display 74.25 MHz (720p60) |
+| Setup / hold slack | WNS **+0.169 ns**, WHS +0.016 ns, 0 failing endpoints |
+| Whole design | 13 090 LUT (24.6 %), 14 374 FF (13.5 %), 104 / 140 BRAM tiles, 0 DSP |
+| Pipeline (vproc) | 5 728 LUT; background model 57 BRAM banks (230 400 x 12 bit) |
+| Power (report_power) | 2.31 W on chip, of which the PS7 is the largest part |
+| CDC | one data crossing (AXI4-Stream to video out FIFO); report_cdc: no critical/warning entries |
+
+Timing closure took four implementation runs; each was driven by the
+failing-path groups (`hw/timing_groups.tcl`), not by tool strategies:
+
+| Run | WNS | Fix |
+|---|---|---|
+| 1 | -4.29 ns | Sobel/Gauss kernel was one combinational stage; labeller address muxed by `tuser` before a LUTRAM read |
+| 2 | -1.84 ns | background RAM write data fanned out to 57 BRAMs; box-table BRAM output fed comparators directly |
+| 3 | -0.76 ns | clock enable to ~114 BRAMs replaced by credit-based flow control; LUTRAM/BRAM write ports registered; overlay split into 3 stages |
+| 4 | **+0.17 ns** | labeller decode cycle for foreground pixels; box merge precomputed; DMA length counter 23 -> 20 bit |
+
+### Simulation (148.5 MHz model clock)
+
+| Measure | Value |
+|---|---|
+| Frame latency, first input pixel to last output pixel, 640x360 | 257 636 cycles = **1.73 ms** |
+| Cycles per pixel | 1.12 (window blocks 1 px/clk; the labeller adds cycles per foreground pixel) |
+| Headroom at 25 fps | 40 ms frame period vs 1.73 ms processing |
+
+### On the board
+
+<!-- HW_RESULTS -->
 
 ## Build
 

@@ -32,3 +32,8 @@ hw/*_out.txt
 hw/.srcs/
 dfx_runtime.txt
 hw/dfx_runtime.txt
+sw/boot/
+hw/tg_out.txt
+hw/tp_out.txt
+hw/emu_out.txt
+sw/vitis_out.txt

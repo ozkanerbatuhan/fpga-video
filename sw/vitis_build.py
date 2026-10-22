@@ -40,24 +40,40 @@ WS.mkdir(parents=True, exist_ok=True)
 client = vitis.create_client()
 client.set_workspace(path=str(WS))
 
+# The lwip_echo_server template only accepts its own lwIP settings when the
+# app is created, so the domain is created with those, the app is created,
+# and then the domain is switched to the settings this firmware needs.
+TEMPLATE_CFG = {
+    ("lwip220", "lwip220_dhcp"): "true",
+    ("lwip220", "lwip220_lwip_dhcp_does_acd_check"): "true",
+    ("lwip220", "lwip220_pbuf_pool_size"): "2048",
+    ("xiltimer", "XILTIMER_en_interval_timer"): "true",
+}
+
+xpfm = WS / PLAT / "export" / PLAT / f"{PLAT}.xpfm"
 if not (WS / PLAT).exists():
     plat = client.create_platform_component(name=PLAT, hw_design=str(XSA), os="standalone",
                                             cpu="ps7_cortexa9_0", domain_name=DOM)
     dom = plat.get_domain(name=DOM)
     dom.set_lib(lib_name="lwip220")
-    for k, v in LWIP.items():
-        dom.set_config(option="lib", param=k, value=v, lib_name="lwip220")
+    for (lib, k), v in TEMPLATE_CFG.items():
+        dom.set_config(option="lib", param=k, value=v, lib_name=lib)
+    plat.build()
 else:
     plat = client.get_component(name=PLAT)
     plat.update_hw(hw_design=str(XSA))
-plat.build()
+    dom = plat.get_domain(name=DOM)
 
-xpfm = WS / PLAT / "export" / PLAT / f"{PLAT}.xpfm"
 if not (WS / APP).exists():
     app = client.create_app_component(name=APP, platform=str(xpfm), domain=DOM,
                                       template="lwip_echo_server")
 else:
     app = client.get_component(name=APP)
+
+for k, v in LWIP.items():
+    dom.set_config(option="lib", param=k, value=v, lib_name="lwip220")
+dom.set_config(option="lib", param="lwip220_lwip_dhcp_does_acd_check", value="false", lib_name="lwip220")
+plat.build()
 
 src = WS / APP / "src"
 for f in ("echo.c",):
@@ -65,6 +81,11 @@ for f in ("echo.c",):
         (src / f).unlink()
 for f in (ROOT / "sw" / "app" / "src").iterdir():
     shutil.copy(f, src / f.name)
+
+# the template lists its sources explicitly; echo.c is replaced by main.c
+cml = src / "CMakeLists.txt"
+cml.write_text("\n".join(l for l in cml.read_text().splitlines()
+                         if "PROJECT_LIB_SOURCES echo.c" not in l) + "\n")
 
 # optimise: the firmware copies ~90 Mbit/s of payload
 cfg = src / "UserConfig.cmake"
