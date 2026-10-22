@@ -1,0 +1,28 @@
+# secrets
+.env
+
+# clips (raw video, hundreds of MB) - regenerate with tools/gen_clips.py / capture_clips.py
+clips/*.yuv
+clips/*.mp4
+
+# simulation output
+sim/build/
+*.jou
+*.log
+*.pb
+*.wdb
+xsim.dir/
+.Xil/
+
+# Vivado / Vitis generated
+hw/build/
+sw/build/
+sw/ws/
+*.str
+
+# Python
+__pycache__/
+*.pyc
+
+# large media (published separately)
+docs/media/*.mp4

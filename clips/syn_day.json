@@ -1,0 +1,8 @@
+{
+  "width": 640,
+  "height": 360,
+  "fps": 25,
+  "frames": 750,
+  "format": "yuyv422",
+  "source": "synthetic:syn_day"
+}
