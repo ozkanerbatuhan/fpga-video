@@ -32,7 +32,7 @@ sys.path.insert(0, str(ROOT / "model"))
 W, H = 640, 360
 LINE = W * 2
 FRAME = LINE * H
-BOARD = ("192.168.1.10", 5000)
+BOARD = ["192.168.1.10", 5000]
 RES_FMT = "<HHIIIIIIHH" + "H" * 32 + "I" * 8 + "IIIII"
 RES_SIZE = struct.calcsize(RES_FMT)
 
@@ -112,7 +112,7 @@ def send_frame(sock, frame_id, frame, pace_us):
     t0 = us()
     for line in range(H):
         hdr = struct.pack("<HHHHI", 0x5646, frame_id & 0xFFFF, line, 1, t0)
-        sock.sendto(hdr + raw[line * LINE:(line + 1) * LINE], BOARD)
+        sock.sendto(hdr + raw[line * LINE:(line + 1) * LINE], tuple(BOARD))
         if pace_us and line % 8 == 7:
             end = time.perf_counter() + pace_us * 8e-6
             while time.perf_counter() < end:
@@ -131,7 +131,9 @@ def main():
     ap.add_argument("--pace-us", type=float, default=20.0, help="gap per packet")
     ap.add_argument("--verify", action="store_true", help="compare boxes with the golden model")
     ap.add_argument("--log", default=None)
+    ap.add_argument("--board", default="192.168.1.10")
     a = ap.parse_args()
+    BOARD[0] = a.board
 
     tx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tx.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 4 << 20)

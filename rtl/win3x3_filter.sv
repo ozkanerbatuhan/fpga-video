@@ -165,59 +165,76 @@ module win3x3_filter #(
         end
     end
 
-    // ---------------- stage 2: kernel ----------------
+    // ---------------- stage A: clamp the left column, register the window ----------------
     logic [DW-1:0] p [3][3];
-    always_comb begin
-        for (int r = 0; r < 3; r++) begin
-            p[r][0] = s2_lclamp ? w[r][1] : w[r][0];
-            p[r][1] = w[r][1];
-            p[r][2] = w[r][2];
+    logic [SW-1:0] sda, sdb;
+    logic          a_valid, a_user, a_last, b_valid, b_user, b_last;
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            a_valid <= 1'b0;
+            b_valid <= 1'b0;
+        end else if (en) begin
+            for (int r = 0; r < 3; r++) begin
+                p[r][0] <= s2_lclamp ? w[r][1] : w[r][0];
+                p[r][1] <= w[r][1];
+                p[r][2] <= w[r][2];
+            end
+            sda <= sd1;
+            a_valid <= s2_valid; a_user <= s2_user; a_last <= s2_last;
+            sdb <= sda;
+            b_valid <= a_valid;  b_user <= a_user;  b_last <= a_last;
         end
     end
 
+    // ---------------- stage B (k1, registered) and output stage (k2) ----------------
+    // Widths are explicit: every operand is zero-extended to 12 bit so no
+    // expression is widened to 32 bit by an integer constant.
     logic [OW-1:0] result;
     generate
         if (KERNEL == "GAUSS") begin : g_gauss
-            logic [DW+3:0] s;
-            always_comb begin
-                s = p[0][0] + 2*p[0][1] + p[0][2]
-                  + 2*p[1][0] + 4*p[1][1] + 2*p[1][2]
-                  + p[2][0] + 2*p[2][1] + p[2][2];
-                result = OW'((s + 8) >> 4);
-            end
+            localparam int SWD = DW + 4;
+            logic [SWD-1:0] r0, r1, r2;           // weighted row sums, k1
+            always_ff @(posedge clk)
+                if (en) begin
+                    r0 <= SWD'(p[0][0]) + (SWD'(p[0][1]) << 1) + SWD'(p[0][2]);
+                    r1 <= SWD'(p[1][0]) + (SWD'(p[1][1]) << 1) + SWD'(p[1][2]);
+                    r2 <= SWD'(p[2][0]) + (SWD'(p[2][1]) << 1) + SWD'(p[2][2]);
+                end
+            wire [SWD-1:0] s = r0 + (r1 << 1) + r2 + SWD'(8);
+            assign result = OW'(s >> 4);
         end else if (KERNEL == "SOBEL") begin : g_sobel
-            logic signed [DW+3:0] gx, gy;
-            logic        [DW+3:0] ax, ay;
-            logic        [DW+4:0] mag, sh;
-            always_comb begin
-                gx = $signed({3'b0, p[0][2]}) + 2*$signed({3'b0, p[1][2]}) + $signed({3'b0, p[2][2]})
-                   - $signed({3'b0, p[0][0]}) - 2*$signed({3'b0, p[1][0]}) - $signed({3'b0, p[2][0]});
-                gy = $signed({3'b0, p[2][0]}) + 2*$signed({3'b0, p[2][1]}) + $signed({3'b0, p[2][2]})
-                   - $signed({3'b0, p[0][0]}) - 2*$signed({3'b0, p[0][1]}) - $signed({3'b0, p[0][2]});
-                ax  = gx[DW+3] ? -gx : gx;
-                ay  = gy[DW+3] ? -gy : gy;
-                mag = ax + ay;
-                sh  = mag >> sobel_shift;
-                result = (sh > (2**OW - 1)) ? {OW{1'b1}} : OW'(sh);
-            end
+            localparam int GW = DW + 4;           // signed, |G| <= 4 * (2^DW - 1)
+            logic signed [GW-1:0] gx, gy;         // k1
+            always_ff @(posedge clk)
+                if (en) begin
+                    gx <= $signed(GW'(p[0][2]) + (GW'(p[1][2]) << 1) + GW'(p[2][2]))
+                        - $signed(GW'(p[0][0]) + (GW'(p[1][0]) << 1) + GW'(p[2][0]));
+                    gy <= $signed(GW'(p[2][0]) + (GW'(p[2][1]) << 1) + GW'(p[2][2]))
+                        - $signed(GW'(p[0][0]) + (GW'(p[0][1]) << 1) + GW'(p[0][2]));
+                end
+            wire [GW-1:0] ax  = gx[GW-1] ? GW'(-gx) : GW'(gx);
+            wire [GW-1:0] ay  = gy[GW-1] ? GW'(-gy) : GW'(gy);
+            wire [GW:0]   mag = {1'b0, ax} + {1'b0, ay};
+            wire [GW:0]   sh  = mag >> sobel_shift;
+            assign result = (|sh[GW:OW]) ? {OW{1'b1}} : sh[OW-1:0];
         end else if (KERNEL == "ERODE") begin : g_erode
-            always_comb begin
-                result = '1;
-                for (int r = 0; r < 3; r++)
-                    for (int c = 0; c < 3; c++)
-                        result = result & OW'(p[r][c]);
-            end
+            logic [OW-1:0] rr [3];
+            always_ff @(posedge clk)
+                if (en)
+                    for (int r = 0; r < 3; r++)
+                        rr[r] <= OW'(p[r][0]) & OW'(p[r][1]) & OW'(p[r][2]);
+            assign result = rr[0] & rr[1] & rr[2];
         end else begin : g_dilate
-            always_comb begin
-                result = '0;
-                for (int r = 0; r < 3; r++)
-                    for (int c = 0; c < 3; c++)
-                        result = result | OW'(p[r][c]);
-            end
+            logic [OW-1:0] rr [3];
+            always_ff @(posedge clk)
+                if (en)
+                    for (int r = 0; r < 3; r++)
+                        rr[r] <= OW'(p[r][0]) | OW'(p[r][1]) | OW'(p[r][2]);
+            assign result = rr[0] | rr[1] | rr[2];
         end
     endgenerate
 
-    // ---------------- stage 3: output register + skid ----------------
+    // ---------------- output register + skid ----------------
     logic              o_valid, o_user, o_last;
     logic [SW+OW-1:0]  o_data;
 
@@ -227,10 +244,10 @@ module win3x3_filter #(
         if (rst)
             o_valid <= 1'b0;
         else if (en) begin
-            o_valid <= s2_valid;
-            o_data  <= {sd1, result};
-            o_user  <= s2_user;
-            o_last  <= s2_last;
+            o_valid <= b_valid;
+            o_data  <= {sdb, result};
+            o_user  <= b_user;
+            o_last  <= b_last;
         end
     end
 

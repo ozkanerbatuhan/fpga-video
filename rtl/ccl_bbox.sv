@@ -78,22 +78,28 @@ module ccl_bbox #(
     end
 
     // ---------------- frame position and neighbours ----------------
-    logic [10:0]   x, y, fw, fh;
+    // x is 0 at every start of frame (it wraps on the last pixel), so the
+    // line-buffer addresses come straight from registers (x, x_p1); only the
+    // row/column flags look at tuser.
+    logic [10:0]   x, x_p1, y, fw, fh;
+    logic          x_last, y_last, y_zero;
     logic [LW-1:0] left_r, saved_u;
     logic [LW:0]   next_l, scan_l;
     logic          in_frame;
 
-    wire [10:0] x_now  = s_tuser ? 11'd0 : x;
+    wire [10:0] x_now  = x;
     wire [10:0] y_now  = s_tuser ? 11'd0 : y;
-    wire [10:0] fw_now = s_tuser ? width  : fw;
-    wire [10:0] fh_now = s_tuser ? height : fh;
-    wire        eol    = (x_now == fw_now - 1);
-    wire        eof    = eol && (y_now == fh_now - 1);
+    wire        row0   = s_tuser || y_zero;
+    wire        col0   = (x == 0);
+    wire        eol    = s_tuser ? (width == 1) : x_last;
+    wire        eof    = eol && (s_tuser ? (height == 1) : y_last);
 
-    wire [LW-1:0] n_u  = (y_now != 0) ? lb[x_now[XW-1:0]] : '0;
-    wire [LW-1:0] n_ur = (y_now != 0 && !eol) ? lb[x_now[XW-1:0] + 1'b1] : '0;
-    wire [LW-1:0] n_ul = (y_now != 0 && x_now != 0) ? saved_u : '0;
-    wire [LW-1:0] n_l  = (x_now != 0) ? left_r : '0;
+    wire [LW-1:0] lb_u  = lb[x[XW-1:0]];
+    wire [LW-1:0] lb_ur = lb[x_p1[XW-1:0]];
+    wire [LW-1:0] n_u  = !row0 ? lb_u : '0;
+    wire [LW-1:0] n_ur = (!row0 && !eol) ? lb_ur : '0;
+    wire [LW-1:0] n_ul = (!row0 && !col0) ? saved_u : '0;
+    wire [LW-1:0] n_l  = !col0 ? left_r : '0;
 
     wire [LW-1:0] lft = (n_l != 0) ? n_l : n_ul;
     wire [LW-1:0] a0  = (n_u != 0) ? n_u : ((n_ur != 0) ? n_ur : lft);
@@ -131,7 +137,9 @@ module ccl_bbox #(
     wire          can_new = (next_l <= MAXL);
     wire [LW-1:0] lo      = (ra < rf) ? ra : rf;
     wire [LW-1:0] hi      = (ra < rf) ? rf : ra;
-    wire [LW-1:0] par_rf  = par[rf];
+    logic [LW-1:0] par_q;
+    logic          pv;
+    always_ff @(posedge clk) par_q <= par[rf];
     wire [LW-1:0] fin_lab = (st == S_UPD && new_lab) ? (can_new ? next_l[LW-1:0] : '0) : root;
     wire          fin     = (st == S_UPD) || (st == S_MRG_UPD);
 
@@ -171,7 +179,7 @@ module ccl_bbox #(
             S_PIX: if (label && !s_tdata[0]) begin
                 lb_we = 1'b1; lb_wa = x_now[XW-1:0]; lb_wd = '0;
             end
-            S_FIND_B: if (par_rf == rf && rf != ra) par_we = 1'b1;
+            S_FIND_B: if (pv && par_q == rf && rf != ra) par_we = 1'b1;
             S_RD:      bb_re = 1'b1;
             S_UPD: begin
                 lb_we = 1'b1;
@@ -196,7 +204,8 @@ module ccl_bbox #(
     always_ff @(posedge clk) begin
         if (rst) begin
             st <= S_PIX;
-            x <= '0; y <= '0;
+            x <= '0; x_p1 <= 11'd1; y <= '0;
+            x_last <= 1'b0; y_last <= 1'b0; y_zero <= 1'b1;
             in_frame <= 1'b0;
             next_l <= 1;
             scan_l <= '0;
@@ -224,8 +233,20 @@ module ccl_bbox #(
                 px <= x_now; py <= y_now;
                 u_cur <= n_u;
                 last_px <= eof;
-                x <= eol ? 11'd0 : x_now + 1'b1;
-                y <= eol ? y_now + 1'b1 : y_now;
+                // next position (x wraps to 0 after the last pixel of a line)
+                if (eol) begin
+                    x <= 11'd0; x_p1 <= 11'd1;
+                    x_last <= ((s_tuser ? width : fw) == 1);
+                    y <= y_now + 1'b1;
+                    y_zero <= 1'b0;
+                    y_last <= (y_now + 1'b1 == (s_tuser ? height : fh) - 1);
+                end else begin
+                    x <= x_p1; x_p1 <= x_p1 + 1'b1;
+                    x_last <= (x_p1 == (s_tuser ? width : fw) - 1);
+                    y <= y_now;
+                    y_zero <= (y_now == 0);
+                    y_last <= (y_now == (s_tuser ? height : fh) - 1);
+                end
                 if (!s_tdata[0]) begin
                     left_r  <= '0;
                     saved_u <= n_u;
@@ -234,29 +255,40 @@ module ccl_bbox #(
                     ca <= a0;
                     cb <= b0;
                     rf <= a0;
+                    pv <= 1'b0;
                     st <= (a0 == 0) ? S_UPD : S_FIND_A;
                 end
             end
 
+            // par_q follows par[rf] one cycle late: pv marks it valid
             S_FIND_A:                       // rf walks up the tree from ca
-                if (par_rf == rf) begin
+                if (!pv)
+                    pv <= 1'b1;
+                else if (par_q == rf) begin
                     ra <= rf;
                     if (cb == 0) begin
                         root <= rf;
                         st <= S_RD;
                     end else begin
                         rf <= cb;
+                        pv <= 1'b0;
                         st <= S_FIND_B;
                     end
-                end else
-                    rf <= par_rf;
+                end else begin
+                    rf <= par_q;
+                    pv <= 1'b0;
+                end
 
             S_FIND_B:                       // rf walks up the tree from cb
-                if (par_rf == rf) begin
+                if (!pv)
+                    pv <= 1'b1;
+                else if (par_q == rf) begin
                     root <= lo;
                     st <= (rf == ra) ? S_RD : S_MRG_HI;   // par[hi] <= lo written by the port logic
-                end else
-                    rf <= par_rf;
+                end else begin
+                    rf <= par_q;
+                    pv <= 1'b0;
+                end
 
             S_RD:     st <= S_UPD;          // bb_q <= bbt[root]
             S_UPD:    if (new_lab) begin

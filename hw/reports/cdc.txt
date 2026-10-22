@@ -1,0 +1,20 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Thu Oct 22 06:51:27 2026
+| Host         : Batu running 64-bit major release  (build 9200)
+| Command      : report_cdc -file D:/fpga-video/hw/reports/cdc.txt
+| Design       : system_wrapper
+| Device       : 7z020-clg484
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Physopt postRoute
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+CDC Report
+
+Severity  Source Clock               Destination Clock          CDC Type                 Exceptions               Endpoints  Safe  Unsafe  Unknown  No ASYNC_REG  
+--------  -------------------------  -------------------------  -----------------------  -----------------------  ---------  ----  ------  -------  ------------  
+Info      clk_out2_system_clk_wiz_0  clk_out1_system_clk_wiz_0  Safely Timed             Max Delay Datapath Only          2     2       0        0             0  
+Info      input port clock           clk_out1_system_clk_wiz_0  No Common Primary Clock  False Path                       2     2       0        0             0  
+Info      clk_out1_system_clk_wiz_0  clk_out2_system_clk_wiz_0  Safely Timed             Max Delay Datapath Only          6     6       0        0             0  
+

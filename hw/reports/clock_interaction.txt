@@ -1,0 +1,26 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Thu Oct 22 06:51:25 2026
+| Host         : Batu running 64-bit major release  (build 9200)
+| Command      : report_clock_interaction -file D:/fpga-video/hw/reports/clock_interaction.txt
+| Design       : system_wrapper
+| Device       : 7z020-clg484
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Physopt postRoute
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Clock Interaction Report
+
+Clock Interaction Table
+-----------------------
+
+                                                              WNS                             TNS Failing  TNS Total    WNS Path         Clock-Pair           Inter-Clock              
+From Clock                     To Clock                       Clock Edges  WNS(ns)   TNS(ns)    Endpoints    Endpoints  Requirement(ns)  Classification       Constraints              
+-----------------------------  -----------------------------  -----------  -------  --------  -----------  -----------  ---------------  -------------------  -----------------------  
+clk_out1_system_clk_wiz_0      clk_out1_system_clk_wiz_0      rise - rise    -4.29  -9459.44        10520        57198             6.73  Clean                Partial False Path       
+clk_out1_system_clk_wiz_0      clk_out2_system_clk_wiz_0      rise - rise     4.96      0.00            0           31             6.73  Ignored              Max Delay Datapath Only  
+clk_out2_system_clk_wiz_0      clk_out1_system_clk_wiz_0      rise - rise    12.14      0.00            0           27            13.47  Ignored              Max Delay Datapath Only  
+clk_out2_system_clk_wiz_0      clk_out2_system_clk_wiz_0      rise - rise     5.77      0.00            0         1008            13.47  Clean                Timed                    
+
+
