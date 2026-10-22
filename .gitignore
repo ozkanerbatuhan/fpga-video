@@ -26,3 +26,9 @@ __pycache__/
 
 # large media (published separately)
 docs/media/*.mp4
+
+# tool scratch
+hw/*_out.txt
+hw/.srcs/
+dfx_runtime.txt
+hw/dfx_runtime.txt
