@@ -3,7 +3,7 @@ Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanc
 | Tool Version     : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
 | Date             : Thu Oct 22 09:04:21 2026
 | Host             : Batu running 64-bit major release  (build 9200)
-| Command          : report_power -file D:/fpga-video/hw/reports/power.txt
+| Command          : report_power -file D:/50-fpga/fpga-video/hw/reports/power.txt
 | Design           : system_wrapper
 | Device           : xc7z020clg484-1
 | Design State     : routed
