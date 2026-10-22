@@ -55,8 +55,8 @@ module ccl_bbox #(
     localparam int XW   = $clog2(MAX_W);
 
     typedef enum logic [3:0] {
-        S_PIX, S_FIND_A, S_FIND_B, S_RD, S_UPD, S_MRG_HI, S_MRG_LO, S_MRG_UPD,
-        S_SCAN0, S_SCAN_RD, S_SCAN_CHK, S_PUB
+        S_PIX, S_FIND_A, S_FIND_B, S_RD, S_RD2, S_UPD, S_MRG_HI, S_MRG_LO, S_MRG_W, S_MRG_UPD,
+        S_SCAN0, S_SCAN_RD, S_SCAN_W, S_SCAN_CHK, S_SCAN_INS, S_PUB
     } state_t;
     state_t st;
 
@@ -68,13 +68,21 @@ module ccl_bbox #(
     logic          lb_we,  par_we,  bb_we, bb_re;
     logic [XW-1:0] lb_wa;
     logic [LW-1:0] lb_wd, par_wa, par_wd, bb_wa, bb_ra;
-    logic [BW-1:0] bb_wd, bb_q;
+    logic [BW-1:0] bb_wd, bb_q, bb_d;
 
+    // LUTRAM writes land one cycle late (registered port): every read of the
+    // same entry happens at least two cycles after the write is requested.
+    logic          lb_we_r, par_we_r;
+    logic [XW-1:0] lb_wa_r;
+    logic [LW-1:0] lb_wd_r, par_wa_r, par_wd_r;
     always_ff @(posedge clk) begin
-        if (lb_we)  lb[lb_wa]   <= lb_wd;
-        if (par_we) par[par_wa] <= par_wd;
+        lb_we_r  <= lb_we;  lb_wa_r  <= lb_wa;  lb_wd_r  <= lb_wd;
+        par_we_r <= par_we; par_wa_r <= par_wa; par_wd_r <= par_wd;
+        if (lb_we_r)  lb[lb_wa_r]   <= lb_wd_r;
+        if (par_we_r) par[par_wa_r] <= par_wd_r;
         if (bb_we)  bbt[bb_wa]  <= bb_wd;
         if (bb_re)  bb_q        <= bbt[bb_ra];
+        bb_d <= bb_q;                       // output register (absorbed into the BRAM)
     end
 
     // ---------------- frame position and neighbours ----------------
@@ -149,13 +157,16 @@ module ccl_bbox #(
     logic          k_v  [K];
     logic          scan_root;
 
-    wire [10:0] c_x0 = bb_q[BW-1  -: 11];
-    wire [10:0] c_y0 = bb_q[BW-12 -: 11];
-    wire [10:0] c_x1 = bb_q[BW-23 -: 11];
-    wire [10:0] c_y1 = bb_q[BW-34 -: 11];
-    wire [17:0] c_a  = bb_q[17:0];
+    wire [10:0] c_x0 = bb_d[BW-1  -: 11];
+    wire [10:0] c_y0 = bb_d[BW-12 -: 11];
+    wire [10:0] c_x1 = bb_d[BW-23 -: 11];
+    wire [10:0] c_y1 = bb_d[BW-34 -: 11];
+    wire [17:0] c_a  = bb_d[17:0];
 
-    logic better [K];
+    logic better [K], better_r [K];
+    logic ins;
+    logic [10:0] cx0, cy0, cx1, cy1;
+    logic [17:0] ca_r;
     logic [3:0] n_valid;
     always_comb begin
         n_valid = '0;
@@ -173,7 +184,7 @@ module ccl_bbox #(
     always_comb begin
         lb_we = 1'b0;  lb_wa = px[XW-1:0];  lb_wd = fin_lab;
         par_we = 1'b0; par_wa = hi;         par_wd = lo;
-        bb_we = 1'b0;  bb_wa = root;        bb_wd = bb_union(bb_q, pix_bb);
+        bb_we = 1'b0;  bb_wa = root;        bb_wd = bb_union(bb_d, pix_bb);
         bb_re = 1'b0;  bb_ra = root;
         case (st)
             S_PIX: if (label && !s_tdata[0]) begin
@@ -193,7 +204,7 @@ module ccl_bbox #(
             S_MRG_LO:  bb_re = 1'b1;
             S_MRG_UPD: begin
                 lb_we = 1'b1;
-                bb_we = 1'b1; bb_wd = bb_union(bb_union(bb_q, bb_hi), pix_bb);
+                bb_we = 1'b1; bb_wd = bb_union(bb_union(bb_d, bb_hi), pix_bb);
             end
             S_SCAN_RD: begin bb_re = 1'b1; bb_ra = scan_l[LW-1:0]; end
             default: ;
@@ -290,15 +301,18 @@ module ccl_bbox #(
                     pv <= 1'b0;
                 end
 
-            S_RD:     st <= S_UPD;          // bb_q <= bbt[root]
+            // box table reads take two cycles: BRAM, then the bb_d register
+            S_RD:     st <= S_RD2;          // read bbt[root]
+            S_RD2:    st <= S_UPD;
             S_UPD:    if (new_lab) begin
                           if (can_new) next_l <= next_l + 1'b1;
                           else overflow <= 1'b1;
                       end
-            S_MRG_HI: st <= S_MRG_LO;       // bb_q <= bbt[hi]
-            S_MRG_LO: begin                 // bb_q <= bbt[lo]
-                bb_hi <= bb_q;
-                st <= S_MRG_UPD;
+            S_MRG_HI: st <= S_MRG_LO;       // read bbt[hi]
+            S_MRG_LO: st <= S_MRG_W;        // read bbt[lo]
+            S_MRG_W: begin                  // bb_d = bbt[hi]
+                bb_hi <= bb_d;
+                st <= S_MRG_UPD;            // next cycle bb_d = bbt[lo]
             end
             S_MRG_UPD: ;
 
@@ -308,17 +322,24 @@ module ccl_bbox #(
                 scan_l <= 1;
                 st <= (next_l == 1) ? S_PUB : S_SCAN_RD;
             end
-            S_SCAN_RD: begin                // bb_q <= bbt[scan_l]
+            S_SCAN_RD: begin                // read bbt[scan_l]
                 scan_root <= (par[scan_l[LW-1:0]] == scan_l[LW-1:0]);
-                st <= S_SCAN_CHK;
+                st <= S_SCAN_W;
             end
-            S_SCAN_CHK: begin
-                if (scan_root && c_a >= min_area) begin
+            S_SCAN_W: st <= S_SCAN_CHK;
+            S_SCAN_CHK: begin               // bb_d = bbt[scan_l]: compare, register
+                ins <= scan_root && c_a >= min_area;
+                cx0 <= c_x0; cy0 <= c_y0; cx1 <= c_x1; cy1 <= c_y1; ca_r <= c_a;
+                for (int i = 0; i < K; i++) better_r[i] <= better[i];
+                st <= S_SCAN_INS;
+            end
+            S_SCAN_INS: begin
+                if (ins) begin
                     for (int i = 0; i < K; i++) begin
-                        if (better[i]) begin
-                            if (i == 0 || !better[(i == 0) ? 0 : i-1]) begin
-                                k_x0[i] <= c_x0; k_y0[i] <= c_y0; k_x1[i] <= c_x1; k_y1[i] <= c_y1;
-                                k_a[i]  <= c_a;  k_v[i]  <= 1'b1;
+                        if (better_r[i]) begin
+                            if (i == 0 || !better_r[(i == 0) ? 0 : i-1]) begin
+                                k_x0[i] <= cx0; k_y0[i] <= cy0; k_x1[i] <= cx1; k_y1[i] <= cy1;
+                                k_a[i]  <= ca_r; k_v[i]  <= 1'b1;
                             end else begin
                                 k_x0[i] <= k_x0[(i == 0) ? 0 : i-1]; k_y0[i] <= k_y0[(i == 0) ? 0 : i-1];
                                 k_x1[i] <= k_x1[(i == 0) ? 0 : i-1]; k_y1[i] <= k_y1[(i == 0) ? 0 : i-1];

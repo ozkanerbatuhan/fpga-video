@@ -36,9 +36,13 @@ module motion_detect #(
     localparam int AW = $clog2(DEPTH);
     localparam int RL = 4;                  // bram_banked read latency
 
-    logic en, skid_ready;
-    assign s_tready = en;
-    wire take = s_tvalid && en;
+    // The pipeline never stalls (no clock enable on the ~114 BRAMs of the
+    // background). Flow control is by credit: a pixel is accepted only while
+    // the output FIFO has room for everything that can still be in flight.
+    logic room;
+    wire  en = 1'b1;
+    assign s_tready = room;
+    wire take = s_tvalid && room;
 
     logic [AW-1:0] addr;
     logic          init_pending, frame_init;
@@ -114,14 +118,14 @@ module motion_detect #(
         .we(en && p_valid[L]), .waddr(p_addr[L]), .wdata(bgn));
 
     // ---------------- output ----------------
+    // Up to RL+2 pixels can be in flight when room drops (room is registered),
+    // so the FIFO keeps 8 entries spare.
     logic          o_valid, o_user, o_last;
     logic [SW+8:0] o_data;
-    assign en = !o_valid || skid_ready;
-
     always_ff @(posedge clk) begin
         if (rst)
             o_valid <= 1'b0;
-        else if (en) begin
+        else begin
             o_valid <= p_valid[L];
             o_data  <= {p_data[L], mask};
             o_user  <= p_user[L];
@@ -129,9 +133,9 @@ module motion_detect #(
         end
     end
 
-    axis_skid #(.W(SW+11)) u_skid (
+    axis_fifo #(.W(SW+11), .DEPTH(32), .SPACE(8)) u_fifo (
         .clk, .rst,
-        .s_data ({o_user, o_last, o_data}), .s_valid(o_valid), .s_ready(skid_ready),
+        .s_data ({o_user, o_last, o_data}), .s_valid(o_valid), .room,
         .m_data ({m_tuser, m_tlast, m_tdata}), .m_valid(m_tvalid), .m_ready(m_tready)
     );
 endmodule

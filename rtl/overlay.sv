@@ -7,6 +7,8 @@
 // ones published by the labelling stage at the end of frame n-1.
 // Box outline is 2 px thick, inside the box. Text: 16 characters, 8x8 font,
 // white; text has priority over boxes, boxes over the image.
+//
+// Pipeline: position -> (box hit, font ROM read) -> compose -> skid.
 module overlay #(
     parameter int K = 8,
     parameter     FONT_FILE = "font8x8.mem"
@@ -38,7 +40,7 @@ module overlay #(
     assign s_tready = en;
     wire take = s_tvalid && en;
 
-    // ---------------- stage 0: position, text lookup ----------------
+    // ---------------- stage 0: position, latch boxes ----------------
     logic [10:0] x, y;
     wire  [10:0] x_now = s_tuser ? 11'd0 : x;
     wire  [10:0] y_now = s_tuser ? 11'd0 : y;
@@ -52,22 +54,6 @@ module overlay #(
         end
     end
 
-    wire signed [11:0] tx = $signed({1'b0, x_now}) - $signed({1'b0, text_x});
-    wire signed [11:0] ty = $signed({1'b0, y_now}) - $signed({1'b0, text_y});
-    wire        in_text   = (tx >= 0) && (tx < 128) && (ty >= 0) && (ty < 8);
-    wire [3:0]  ci        = tx[6:3];
-    wire [7:0]  code      = text[ci*8 +: 8];
-    wire        printable = (code >= 8'd32) && (code <= 8'd127);
-    wire [6:0]  gi        = 7'(code - 8'd32);
-    wire [9:0]  rom_a     = {gi, ty[2:0]};
-
-    logic [7:0] font [0:767];
-    initial $readmemh(FONT_FILE, font);
-    logic [7:0] rom_q;
-    always_ff @(posedge clk)
-        if (en) rom_q <= font[rom_a];
-
-    // boxes latched at start of frame
     logic [10:0] bx0 [K], by0 [K], bx1 [K], by1 [K];
     logic        bv  [K];
     always_ff @(posedge clk) begin
@@ -84,8 +70,7 @@ module overlay #(
         end
     end
 
-    logic        p1_valid, p1_user, p1_last, p1_text;
-    logic [2:0]  p1_col;
+    logic        p1_valid, p1_user, p1_last;
     logic [10:0] p1_x, p1_y;
     logic [33:0] p1_data;
     always_ff @(posedge clk) begin
@@ -98,17 +83,60 @@ module overlay #(
             p1_data  <= s_tdata;
             p1_x     <= x_now;
             p1_y     <= y_now;
-            p1_text  <= in_text && printable;
-            p1_col   <= tx[2:0];
         end
     end
 
-    // ---------------- stage 1: compose ----------------
-    wire [15:0] orig  = p1_data[33:18];
-    wire [7:0]  sob   = p1_data[17:10];
-    wire [7:0]  gau   = p1_data[9:2];
-    wire        mraw  = p1_data[1];
-    wire        msk   = p1_data[0];
+    // ---------------- stage 1: box hit, font ROM ----------------
+    wire signed [11:0] tx = $signed({1'b0, p1_x}) - $signed({1'b0, text_x});
+    wire signed [11:0] ty = $signed({1'b0, p1_y}) - $signed({1'b0, text_y});
+    wire        in_text   = (tx >= 0) && (tx < 128) && (ty >= 0) && (ty < 8);
+    wire [3:0]  ci        = tx[6:3];
+    wire [7:0]  code      = text[ci*8 +: 8];
+    wire        printable = (code >= 8'd32) && (code <= 8'd127);
+    wire [6:0]  gi        = 7'(code - 8'd32);
+    wire [9:0]  rom_a     = {gi, ty[2:0]};
+
+    logic [7:0] font [0:767];
+    initial $readmemh(FONT_FILE, font);
+    logic [7:0] rom_q;
+    always_ff @(posedge clk)
+        if (en) rom_q <= font[rom_a];
+
+    logic hit;
+    always_comb begin
+        hit = 1'b0;
+        for (int i = 0; i < K; i++) begin
+            if (bv[i] &&
+                p1_x >= bx0[i] && p1_x <= bx1[i] && p1_y >= by0[i] && p1_y <= by1[i] &&
+                !(p1_x >= bx0[i] + 2 && p1_x + 2 <= bx1[i] && p1_y >= by0[i] + 2 && p1_y + 2 <= by1[i]))
+                hit = 1'b1;
+        end
+    end
+
+    logic        p2_valid, p2_user, p2_last, p2_text, p2_hit, p2_odd;
+    logic [2:0]  p2_col;
+    logic [33:0] p2_data;
+    always_ff @(posedge clk) begin
+        if (rst)
+            p2_valid <= 1'b0;
+        else if (en) begin
+            p2_valid <= p1_valid;
+            p2_user  <= p1_user;
+            p2_last  <= p1_last;
+            p2_data  <= p1_data;
+            p2_text  <= in_text && printable;
+            p2_col   <= tx[2:0];
+            p2_hit   <= hit;
+            p2_odd   <= p1_x[0];
+        end
+    end
+
+    // ---------------- stage 2: compose ----------------
+    wire [15:0] orig  = p2_data[33:18];
+    wire [7:0]  sob   = p2_data[17:10];
+    wire [7:0]  gau   = p2_data[9:2];
+    wire        mraw  = p2_data[1];
+    wire        msk   = p2_data[0];
 
     logic [7:0] by, bc;
     always_comb begin
@@ -124,26 +152,15 @@ module overlay #(
         endcase
     end
 
-    logic hit;
-    always_comb begin
-        hit = 1'b0;
-        for (int i = 0; i < K; i++) begin
-            if (bv[i] &&
-                p1_x >= bx0[i] && p1_x <= bx1[i] && p1_y >= by0[i] && p1_y <= by1[i] &&
-                !(p1_x >= bx0[i] + 2 && p1_x + 2 <= bx1[i] && p1_y >= by0[i] + 2 && p1_y + 2 <= by1[i]))
-                hit = 1'b1;
-        end
-    end
-
-    wire glyph = p1_text && rom_q[p1_col];
+    wire glyph = p2_text && rom_q[p2_col];
     logic [7:0] oy, oc;
     always_comb begin
         oy = by; oc = bc;
         if (overlay_en && glyph) begin
             oy = 8'd235; oc = 8'd128;
-        end else if (overlay_en && hit) begin
+        end else if (overlay_en && p2_hit) begin
             oy = box_color[7:0];
-            oc = p1_x[0] ? box_color[23:16] : box_color[15:8];
+            oc = p2_odd ? box_color[23:16] : box_color[15:8];
         end
     end
 
@@ -154,9 +171,9 @@ module overlay #(
         if (rst)
             o_valid <= 1'b0;
         else if (en) begin
-            o_valid <= p1_valid;
-            o_user  <= p1_user;
-            o_last  <= p1_last;
+            o_valid <= p2_valid;
+            o_user  <= p2_user;
+            o_last  <= p2_last;
             o_data  <= {oc, oy};
         end
     end

@@ -29,13 +29,33 @@ module bram_banked #(
     logic [W-1:0] q   [NB];
     logic [W-1:0] qr  [NB];
 
+    // Write port: registered twice, the second time once per group of 8 banks,
+    // so no single register drives all ~57 BRAMs spread over the die. A write
+    // lands 2 cycles after it is presented; callers must not read an address
+    // within 2 cycles of writing it.
+    logic          we1;
+    logic [AW-1:0] wa1;
+    logic [W-1:0]  wd1;
+    always_ff @(posedge clk) begin
+        we1 <= we; wa1 <= waddr; wd1 <= wdata;
+    end
+    (* equivalent_register_removal = "no" *) logic          we2 [NG];
+    (* equivalent_register_removal = "no" *) logic [AW-1:0] wa2 [NG];
+    (* equivalent_register_removal = "no" *) logic [W-1:0]  wd2 [NG];
+    always_ff @(posedge clk)
+        for (int i = 0; i < NG; i++) begin
+            we2[i] <= we1 && (wa1[AW-1:BW+3] == (AW-BW-3)'(i));
+            wa2[i] <= wa1;
+            wd2[i] <= wd1;
+        end
+
     genvar b;
     generate
         for (b = 0; b < NB; b++) begin : g_bank
             (* ram_style = "block" *) logic [W-1:0] mem [BANK];
             always_ff @(posedge clk) begin
-                if (we && waddr[AW-1:BW] == SW'(b))
-                    mem[waddr[BW-1:0]] <= wdata;
+                if (we2[b / 8] && wa2[b / 8][BW+2:BW] == 3'(b % 8))
+                    mem[wa2[b / 8][BW-1:0]] <= wd2[b / 8];
                 if (en) begin
                     q[b]  <= mem[raddr[BW-1:0]];
                     qr[b] <= q[b];

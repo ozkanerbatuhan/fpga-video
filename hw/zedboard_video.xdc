@@ -34,3 +34,8 @@ set_property -dict {PACKAGE_PIN U21 IOSTANDARD LVCMOS33} [get_ports {led[3]}]
 
 # GPIO control bits are static (written once by software).
 set_false_path -to [get_cells -hierarchical -filter {NAME =~ *u_hdmi*ctrl_q1_reg*}]
+
+# Configuration registers are written by software between frames and are
+# quasi-static; their consumers may take two cycles.
+set_multicycle_path -setup 2 -from [get_cells -hierarchical -filter {NAME =~ *u_regs/r_*_reg*}]
+set_multicycle_path -hold 1  -from [get_cells -hierarchical -filter {NAME =~ *u_regs/r_*_reg*}]
