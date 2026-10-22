@@ -28,7 +28,7 @@ from yuv import read_frames  # noqa: E402
 
 VIVADO_BIN = Path(os.environ.get("VIVADO_BIN", r"D:\AMDDesignTools\2025.2\Vivado\bin"))
 BUILD = ROOT / "sim" / "build"
-RTL = ["axis_skid.sv", "win3x3_filter.sv", "motion_detect.sv", "ccl_bbox.sv", "overlay.sv",
+RTL = ["axis_skid.sv", "bram_banked.sv", "win3x3_filter.sv", "motion_detect.sv", "ccl_bbox.sv", "overlay.sv",
        "luma.sv", "stream_adapt.sv", "vproc_regs.sv", "vproc_top.sv", "upscale2x.sv"]
 CLIP = ROOT / "clips" / "syn_busy.yuv"
 # output tdata width per DUT (the TB masks the rest of its 64-bit bus)

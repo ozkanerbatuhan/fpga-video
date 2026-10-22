@@ -7,8 +7,8 @@
 //
 // tdata in  = {side, g[7:0]}
 // tdata out = {side, g[7:0], mask}
-// Read latency of the background RAM is 2 (BRAM output register), so the
-// pipeline is: accept/read -> RAM reg -> compute/write-back -> out reg -> skid.
+// The background RAM (bram_banked) has a read latency of RL cycles; pixel data
+// waits in a matching delay line, then bg' is written back to the same address.
 module motion_detect #(
     parameter int SW    = 24,
     parameter int DEPTH = 640 * 360
@@ -34,6 +34,7 @@ module motion_detect #(
     output logic             err_overflow   // frame larger than DEPTH
 );
     localparam int AW = $clog2(DEPTH);
+    localparam int RL = 4;                  // bram_banked read latency
 
     logic en, skid_ready;
     assign s_tready = en;
@@ -74,50 +75,43 @@ module motion_detect #(
         end
     end
 
-    // ---------------- background RAM ----------------
-    (* ram_style = "block" *) logic [11:0] mem [DEPTH];
-    logic [11:0] q1, q2;
-
-    logic          p1_valid, p2_valid;
-    logic [SW+7:0] p1_data, p2_data;
-    logic          p1_user, p2_user, p1_last, p2_last, p1_init, p2_init;
-    logic [AW-1:0] p1_addr, p2_addr;
-
-    always_ff @(posedge clk) begin
-        if (en) begin
-            q1 <= mem[a_now];
-            q2 <= q1;
-        end
-    end
+    // ---------------- delay line matching the RAM latency ----------------
+    logic [11:0]   q;
+    logic          p_valid [RL];
+    logic [SW+7:0] p_data  [RL];
+    logic          p_user  [RL], p_last [RL], p_init [RL];
+    logic [AW-1:0] p_addr  [RL];
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            p1_valid <= 1'b0;
-            p2_valid <= 1'b0;
+            for (int i = 0; i < RL; i++) p_valid[i] <= 1'b0;
         end else if (en) begin
-            p1_valid <= take;
-            p1_data  <= s_tdata;  p1_user <= s_tuser; p1_last <= s_tlast;
-            p1_init  <= init_now; p1_addr <= a_now;
-            p2_valid <= p1_valid;
-            p2_data  <= p1_data;  p2_user <= p1_user; p2_last <= p1_last;
-            p2_init  <= p1_init;  p2_addr <= p1_addr;
+            p_valid[0] <= take;
+            p_data[0]  <= s_tdata;  p_user[0] <= s_tuser; p_last[0] <= s_tlast;
+            p_init[0]  <= init_now; p_addr[0] <= a_now;
+            for (int i = 1; i < RL; i++) begin
+                p_valid[i] <= p_valid[i-1];
+                p_data[i]  <= p_data[i-1]; p_user[i] <= p_user[i-1]; p_last[i] <= p_last[i-1];
+                p_init[i]  <= p_init[i-1]; p_addr[i] <= p_addr[i-1];
+            end
         end
     end
 
     // ---------------- compute ----------------
-    wire [7:0]          g    = p2_data[7:0];
-    wire [8:0]          bgi  = {1'b0, q2[11:4]};
+    localparam int L = RL - 1;
+    wire [7:0]          g    = p_data[L][7:0];
+    wire [8:0]          bgi  = {1'b0, q[11:4]};
     wire signed [9:0]   dif  = $signed({2'b0, g}) - $signed({1'b0, bgi});
     wire [8:0]          adif = dif[9] ? 9'(-dif) : dif[8:0];
-    wire                mask = !p2_init && (adif > {1'b0, thresh});
-    wire signed [13:0]  d    = $signed({2'b0, g, 4'b0}) - $signed({2'b0, q2});
+    wire                mask = !p_init[L] && (adif > {1'b0, thresh});
+    wire signed [13:0]  d    = $signed({2'b0, g, 4'b0}) - $signed({2'b0, q});
     wire signed [13:0]  step = d >>> alpha_shift;
-    wire [11:0]         bgn  = p2_init ? {g, 4'b0} : 12'($signed({2'b0, q2}) + step);
+    wire [11:0]         bgn  = p_init[L] ? {g, 4'b0} : 12'($signed({2'b0, q}) + step);
 
-    always_ff @(posedge clk) begin
-        if (en && p2_valid)
-            mem[p2_addr] <= bgn;
-    end
+    bram_banked #(.DEPTH(DEPTH), .W(12)) u_bg (
+        .clk, .en,
+        .raddr(a_now), .rdata(q),
+        .we(en && p_valid[L]), .waddr(p_addr[L]), .wdata(bgn));
 
     // ---------------- output ----------------
     logic          o_valid, o_user, o_last;
@@ -128,10 +122,10 @@ module motion_detect #(
         if (rst)
             o_valid <= 1'b0;
         else if (en) begin
-            o_valid <= p2_valid;
-            o_data  <= {p2_data, mask};
-            o_user  <= p2_user;
-            o_last  <= p2_last;
+            o_valid <= p_valid[L];
+            o_data  <= {p_data[L], mask};
+            o_user  <= p_user[L];
+            o_last  <= p_last[L];
         end
     end
 

@@ -1,0 +1,36 @@
+# ZedBoard HDMI (ADV7511), bank 33, 3.3 V. Pins from Digilent Zedboard-Master.xdc.
+set_property -dict {PACKAGE_PIN W18  IOSTANDARD LVCMOS33} [get_ports hd_clk]
+set_property -dict {PACKAGE_PIN Y13  IOSTANDARD LVCMOS33} [get_ports {hd_d[0]}]
+set_property -dict {PACKAGE_PIN AA13 IOSTANDARD LVCMOS33} [get_ports {hd_d[1]}]
+set_property -dict {PACKAGE_PIN AA14 IOSTANDARD LVCMOS33} [get_ports {hd_d[2]}]
+set_property -dict {PACKAGE_PIN Y14  IOSTANDARD LVCMOS33} [get_ports {hd_d[3]}]
+set_property -dict {PACKAGE_PIN AB15 IOSTANDARD LVCMOS33} [get_ports {hd_d[4]}]
+set_property -dict {PACKAGE_PIN AB16 IOSTANDARD LVCMOS33} [get_ports {hd_d[5]}]
+set_property -dict {PACKAGE_PIN AA16 IOSTANDARD LVCMOS33} [get_ports {hd_d[6]}]
+set_property -dict {PACKAGE_PIN AB17 IOSTANDARD LVCMOS33} [get_ports {hd_d[7]}]
+set_property -dict {PACKAGE_PIN AA17 IOSTANDARD LVCMOS33} [get_ports {hd_d[8]}]
+set_property -dict {PACKAGE_PIN Y15  IOSTANDARD LVCMOS33} [get_ports {hd_d[9]}]
+set_property -dict {PACKAGE_PIN W13  IOSTANDARD LVCMOS33} [get_ports {hd_d[10]}]
+set_property -dict {PACKAGE_PIN W15  IOSTANDARD LVCMOS33} [get_ports {hd_d[11]}]
+set_property -dict {PACKAGE_PIN V15  IOSTANDARD LVCMOS33} [get_ports {hd_d[12]}]
+set_property -dict {PACKAGE_PIN U17  IOSTANDARD LVCMOS33} [get_ports {hd_d[13]}]
+set_property -dict {PACKAGE_PIN V14  IOSTANDARD LVCMOS33} [get_ports {hd_d[14]}]
+set_property -dict {PACKAGE_PIN V13  IOSTANDARD LVCMOS33} [get_ports {hd_d[15]}]
+set_property -dict {PACKAGE_PIN U16  IOSTANDARD LVCMOS33} [get_ports hd_de]
+set_property -dict {PACKAGE_PIN V17  IOSTANDARD LVCMOS33} [get_ports hd_hsync]
+set_property -dict {PACKAGE_PIN W17  IOSTANDARD LVCMOS33} [get_ports hd_vsync]
+set_property -dict {PACKAGE_PIN AA18 IOSTANDARD LVCMOS33} [get_ports iic_hdmi_scl_io]
+set_property -dict {PACKAGE_PIN Y16  IOSTANDARD LVCMOS33} [get_ports iic_hdmi_sda_io]
+
+set_property IOB TRUE [get_cells -hierarchical -filter {NAME =~ *u_hdmi*hd_d_reg*}]
+set_property IOB TRUE [get_cells -hierarchical -filter {NAME =~ *u_hdmi*hd_*sync_reg}]
+set_property IOB TRUE [get_cells -hierarchical -filter {NAME =~ *u_hdmi*hd_de_reg}]
+
+# User LEDs LD0..LD3: heartbeat / status
+set_property -dict {PACKAGE_PIN T22 IOSTANDARD LVCMOS33} [get_ports {led[0]}]
+set_property -dict {PACKAGE_PIN T21 IOSTANDARD LVCMOS33} [get_ports {led[1]}]
+set_property -dict {PACKAGE_PIN U22 IOSTANDARD LVCMOS33} [get_ports {led[2]}]
+set_property -dict {PACKAGE_PIN U21 IOSTANDARD LVCMOS33} [get_ports {led[3]}]
+
+# GPIO control bits are static (written once by software).
+set_false_path -to [get_cells -hierarchical -filter {NAME =~ *u_hdmi*ctrl_q1_reg*}]

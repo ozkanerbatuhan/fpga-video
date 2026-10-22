@@ -1,0 +1,738 @@
+
+****** Vivado v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Thu Oct 22 06:01:16 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source {hw\build.tcl}
+# set root  [file normalize [file join [file dirname [info script]] ..]]
+# set bdir  $root/hw/build
+# set rdir  $root/hw/reports
+# set stop  [expr {[llength $argv] > 0 ? [lindex $argv 0] : "all"}]
+# file mkdir $rdir
+# set_param board.repoPaths [list "$::env(APPDATA)/Xilinx/Vivado/2025.2/xhub/board_store/xilinx_board_store/XilinxBoardStore/Vivado/2025.2/boards"]
+# create_project video $bdir -part xc7z020clg484-1 -force
+create_project: Time (s): cpu = 00:00:11 ; elapsed = 00:00:07 . Memory (MB): peak = 662.453 ; gain = 221.586
+# set_property board_part avnet.com:zedboard:part0:1.4 [current_project]
+# set_property target_language Verilog [current_project]
+# add_files [glob $root/rtl/*.sv] [glob $root/hw/hdl/*.v] $root/rtl/font8x8.mem
+# set_property file_type {Memory File} [get_files font8x8.mem]
+# add_files -fileset constrs_1 $root/hw/zedboard_video.xdc
+# update_compile_order -fileset sources_1
+# create_bd_design system
+Wrote  : <D:\fpga-video\hw\build\video.srcs\sources_1\bd\system\system.bd> 
+# set ps [create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7 ps7]
+# apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 \
+#     -config {make_external "FIXED_IO, DDR" apply_board_preset "1" Master "Disable" Slave "Disable"} $ps
+# set_property -dict [list \
+#     CONFIG.PCW_USE_M_AXI_GP0 {1} \
+#     CONFIG.PCW_USE_S_AXI_HP0 {1} \
+#     CONFIG.PCW_S_AXI_HP0_DATA_WIDTH {64} \
+#     CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {100} \
+#     CONFIG.PCW_USE_FABRIC_INTERRUPT {0}] $ps
+INFO: [Device 21-403] Loading part xc7z020clg484-1
+create_bd_cell: Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 1033.113 ; gain = 257.945
+# set cw [create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz clk_wiz]
+# set_property -dict [list \
+#     CONFIG.PRIM_IN_FREQ {100} \
+#     CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {148.5} \
+#     CONFIG.CLKOUT2_USED {true} \
+#     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {74.25} \
+#     CONFIG.RESET_TYPE {ACTIVE_LOW} \
+#     CONFIG.RESET_PORT {resetn}] $cw
+# connect_bd_net [get_bd_pins ps7/FCLK_CLK0] [get_bd_pins clk_wiz/clk_in1]
+# connect_bd_net [get_bd_pins ps7/FCLK_RESET0_N] [get_bd_pins clk_wiz/resetn]
+# set clk  [get_bd_pins clk_wiz/clk_out1]
+# set pclk [get_bd_pins clk_wiz/clk_out2]
+# create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_proc
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+# create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_pix
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+# foreach r {rst_proc rst_pix} {
+#     connect_bd_net [get_bd_pins ps7/FCLK_RESET0_N] [get_bd_pins $r/ext_reset_in]
+#     connect_bd_net [get_bd_pins clk_wiz/locked] [get_bd_pins $r/dcm_locked]
+# }
+# connect_bd_net $clk  [get_bd_pins rst_proc/slowest_sync_clk]
+# connect_bd_net $pclk [get_bd_pins rst_pix/slowest_sync_clk]
+# set aresetn [get_bd_pins rst_proc/peripheral_aresetn]
+# set dma [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma dma]
+# set_property -dict [list \
+#     CONFIG.c_include_sg {0} \
+#     CONFIG.c_sg_length_width {23} \
+#     CONFIG.c_m_axis_mm2s_tdata_width {16} \
+#     CONFIG.c_s_axis_s2mm_tdata_width {16} \
+#     CONFIG.c_m_axi_mm2s_data_width {64} \
+#     CONFIG.c_m_axi_s2mm_data_width {64} \
+#     CONFIG.c_mm2s_burst_size {64} \
+#     CONFIG.c_s2mm_burst_size {64}] $dma
+# create_bd_cell -type module -reference vproc_axi vproc
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axis' of definition 'xilinx.com:interface:axis:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axis' of definition 'xilinx.com:interface:axis:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axi' of definition 'xilinx.com:interface:aximm:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'aresetn' of definition 'xilinx.com:signal:reset:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'aclk' of definition 'xilinx.com:signal:clock:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-4728] Bus Interface 'aresetn': Added interface parameter 'POLARITY' with value 'ACTIVE_LOW'.
+INFO: [IP_Flow 19-4728] Bus Interface 'aclk': Added interface parameter 'ASSOCIATED_BUSIF' with value 'm_axis'.
+INFO: [IP_Flow 19-4728] Bus Interface 'aclk': Added interface parameter 'ASSOCIATED_RESET' with value 'aresetn'.
+WARNING: [IP_Flow 19-11770] Clock interface 'aclk' has no FREQ_HZ parameter.
+# connect_bd_intf_net [get_bd_intf_pins dma/M_AXIS_MM2S] [get_bd_intf_pins vproc/s_axis]
+# connect_bd_intf_net [get_bd_intf_pins vproc/m_axis] [get_bd_intf_pins dma/S_AXIS_S2MM]
+# set vdma [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_vdma vdma]
+# set_property -dict [list \
+#     CONFIG.c_include_s2mm {0} \
+#     CONFIG.c_include_sg {0} \
+#     CONFIG.c_m_axis_mm2s_tdata_width {16} \
+#     CONFIG.c_m_axi_mm2s_data_width {64} \
+#     CONFIG.c_mm2s_max_burst_length {32} \
+#     CONFIG.c_mm2s_linebuffer_depth {1024} \
+#     CONFIG.c_num_fstores {3} \
+#     CONFIG.c_use_mm2s_fsync {0}] $vdma
+# create_bd_cell -type module -reference upscale_axi upscale
+INFO: [IP_Flow 19-5107] Inferred bus interface 'm_axis' of definition 'xilinx.com:interface:axis:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 's_axis' of definition 'xilinx.com:interface:axis:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'aresetn' of definition 'xilinx.com:signal:reset:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'aclk' of definition 'xilinx.com:signal:clock:1.0' (from Xilinx Repository).
+INFO: [IP_Flow 19-4728] Bus Interface 'aresetn': Added interface parameter 'POLARITY' with value 'ACTIVE_LOW'.
+INFO: [IP_Flow 19-4728] Bus Interface 'aclk': Added interface parameter 'ASSOCIATED_BUSIF' with value 'm_axis'.
+INFO: [IP_Flow 19-4728] Bus Interface 'aclk': Added interface parameter 'ASSOCIATED_RESET' with value 'aresetn'.
+WARNING: [IP_Flow 19-11770] Clock interface 'aclk' has no FREQ_HZ parameter.
+# connect_bd_intf_net [get_bd_intf_pins vdma/M_AXIS_MM2S] [get_bd_intf_pins upscale/s_axis]
+# set vtc [create_bd_cell -type ip -vlnv xilinx.com:ip:v_tc vtc]
+# set_property -dict [list \
+#     CONFIG.HAS_AXI4_LITE {false} \
+#     CONFIG.enable_detection {false} \
+#     CONFIG.VIDEO_MODE {720p} \
+#     CONFIG.VID_PPC {1} \
+#     CONFIG.GEN_VIDEO_FORMAT {YUV_422}] $vtc
+WARNING: [IP_Flow 19-3374] An attempt to modify the value of disabled parameter 'VID_PPC' from '4' to '1' has been ignored for IP 'vtc'
+# set vo [create_bd_cell -type ip -vlnv xilinx.com:ip:v_axi4s_vid_out vid_out]
+# set_property -dict [list \
+#     CONFIG.C_HAS_ASYNC_CLK {1} \
+#     CONFIG.C_S_AXIS_VIDEO_FORMAT {0} \
+#     CONFIG.C_S_AXIS_VIDEO_DATA_WIDTH {8} \
+#     CONFIG.C_ADDR_WIDTH {12}] $vo
+# connect_bd_intf_net [get_bd_intf_pins upscale/m_axis] [get_bd_intf_pins vid_out/video_in]
+# connect_bd_intf_net [get_bd_intf_pins vtc/vtiming_out] [get_bd_intf_pins vid_out/vtiming_in]
+# connect_bd_net [get_bd_pins vid_out/vtg_ce] [get_bd_pins vtc/gen_clken]
+# create_bd_cell -type module -reference hdmi_out u_hdmi
+INFO: [IP_Flow 19-5107] Inferred bus interface 'pix_clk' of definition 'xilinx.com:signal:clock:1.0' (from Xilinx Repository).
+WARNING: [IP_Flow 19-5661] Bus Interface 'pix_clk' does not have any bus interfaces associated with it.
+WARNING: [IP_Flow 19-11770] Clock interface 'pix_clk' has no FREQ_HZ parameter.
+# connect_bd_net [get_bd_pins vid_out/vid_data]         [get_bd_pins u_hdmi/vid_data]
+WARNING: [BD 41-1306] The connection to interface pin </vid_out/vid_data> is being overridden by the user with net <vid_out_vid_data>. This pin will not be connected as a part of interface connection <vid_io_out>, and might not recreate the connectivity as expected using the writ_bd_tcl command.
+# connect_bd_net [get_bd_pins vid_out/vid_hsync]        [get_bd_pins u_hdmi/vid_hsync]
+WARNING: [BD 41-1306] The connection to interface pin </vid_out/vid_hsync> is being overridden by the user with net <vid_out_vid_hsync>. This pin will not be connected as a part of interface connection <vid_io_out>, and might not recreate the connectivity as expected using the writ_bd_tcl command.
+# connect_bd_net [get_bd_pins vid_out/vid_vsync]        [get_bd_pins u_hdmi/vid_vsync]
+WARNING: [BD 41-1306] The connection to interface pin </vid_out/vid_vsync> is being overridden by the user with net <vid_out_vid_vsync>. This pin will not be connected as a part of interface connection <vid_io_out>, and might not recreate the connectivity as expected using the writ_bd_tcl command.
+# connect_bd_net [get_bd_pins vid_out/vid_active_video] [get_bd_pins u_hdmi/vid_active_video]
+WARNING: [BD 41-1306] The connection to interface pin </vid_out/vid_active_video> is being overridden by the user with net <vid_out_vid_active_video>. This pin will not be connected as a part of interface connection <vid_io_out>, and might not recreate the connectivity as expected using the writ_bd_tcl command.
+# foreach p {hd_clk hd_hsync hd_vsync hd_de} { create_bd_port -dir O $p }
+# create_bd_port -dir O -from 15 -to 0 hd_d
+# create_bd_port -dir O -from 3 -to 0 led
+# foreach p {hd_clk hd_d hd_hsync hd_vsync hd_de led} {
+#     connect_bd_net [get_bd_pins u_hdmi/$p] [get_bd_ports $p]
+# }
+# set iic [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic iic_hdmi]
+# set_property CONFIG.IIC_FREQ_KHZ {100} $iic
+# create_bd_intf_port -mode Master -vlnv xilinx.com:interface:iic_rtl:1.0 iic_hdmi
+# connect_bd_intf_net [get_bd_intf_pins iic_hdmi/IIC] [get_bd_intf_ports iic_hdmi]
+# set gpio [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio gpio]
+# set_property -dict [list CONFIG.C_GPIO_WIDTH {5} CONFIG.C_ALL_OUTPUTS {1}] $gpio
+# connect_bd_net [get_bd_pins gpio/gpio_io_o] [get_bd_pins u_hdmi/ctrl]
+WARNING: [BD 41-1306] The connection to interface pin </gpio/gpio_io_o> is being overridden by the user with net <gpio_gpio_io_o>. This pin will not be connected as a part of interface connection <GPIO>, and might not recreate the connectivity as expected using the writ_bd_tcl command.
+# foreach p {vproc/aclk upscale/aclk dma/s_axi_lite_aclk dma/m_axi_mm2s_aclk dma/m_axi_s2mm_aclk
+#            vdma/s_axi_lite_aclk vdma/m_axi_mm2s_aclk vdma/m_axis_mm2s_aclk
+#            vid_out/aclk iic_hdmi/s_axi_aclk gpio/s_axi_aclk ps7/M_AXI_GP0_ACLK ps7/S_AXI_HP0_ACLK} {
+#     connect_bd_net $clk [get_bd_pins $p]
+# }
+# foreach p {vtc/clk vid_out/vid_io_out_clk u_hdmi/pix_clk} {
+#     connect_bd_net $pclk [get_bd_pins $p]
+# }
+# foreach p {vproc/aresetn upscale/aresetn dma/axi_resetn vdma/axi_resetn
+#            iic_hdmi/s_axi_aresetn gpio/s_axi_aresetn vid_out/aresetn} {
+#     connect_bd_net $aresetn [get_bd_pins $p]
+# }
+# connect_bd_net [get_bd_pins rst_pix/peripheral_aresetn] [get_bd_pins vtc/resetn]
+# connect_bd_net [get_bd_pins rst_pix/peripheral_reset]   [get_bd_pins vid_out/vid_io_out_reset]
+# set ic [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect ic_ctrl]
+# set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {5}] $ic
+# connect_bd_intf_net [get_bd_intf_pins ps7/M_AXI_GP0] [get_bd_intf_pins ic_ctrl/S00_AXI]
+# set i 0
+# foreach s {vproc/s_axi dma/S_AXI_LITE vdma/S_AXI_LITE iic_hdmi/S_AXI gpio/S_AXI} {
+#     connect_bd_intf_net [get_bd_intf_pins ic_ctrl/M0${i}_AXI] [get_bd_intf_pins $s]
+#     incr i
+# }
+# connect_bd_net $clk [get_bd_pins ic_ctrl/aclk]
+# connect_bd_net $aresetn [get_bd_pins ic_ctrl/aresetn]
+# set im [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect ic_mem]
+# set_property -dict [list CONFIG.NUM_SI {3} CONFIG.NUM_MI {1}] $im
+# connect_bd_intf_net [get_bd_intf_pins dma/M_AXI_MM2S]  [get_bd_intf_pins ic_mem/S00_AXI]
+# connect_bd_intf_net [get_bd_intf_pins dma/M_AXI_S2MM]  [get_bd_intf_pins ic_mem/S01_AXI]
+# connect_bd_intf_net [get_bd_intf_pins vdma/M_AXI_MM2S] [get_bd_intf_pins ic_mem/S02_AXI]
+# connect_bd_intf_net [get_bd_intf_pins ic_mem/M00_AXI]  [get_bd_intf_pins ps7/S_AXI_HP0]
+# connect_bd_net $clk [get_bd_pins ic_mem/aclk]
+# connect_bd_net $aresetn [get_bd_pins ic_mem/aresetn]
+# assign_bd_address
+INFO: [BD 41-3093] Triggering Legacy Auto Assign Algorithm
+Slave segment '/ps7/S_AXI_HP0/HP0_DDR_LOWOCM' is being assigned into address space '/dma/Data_MM2S' at <0x0000_0000 [ 512M ]>.
+Slave segment '/ps7/S_AXI_HP0/HP0_DDR_LOWOCM' is being assigned into address space '/dma/Data_S2MM' at <0x0000_0000 [ 512M ]>.
+Slave segment '/ps7/S_AXI_HP0/HP0_DDR_LOWOCM' is being assigned into address space '/vdma/Data_MM2S' at <0x0000_0000 [ 512M ]>.
+Slave segment '/vproc/s_axi/reg0' is being assigned into address space '/ps7/Data' at <0x4000_0000 [ 4K ]>.
+Slave segment '/dma/S_AXI_LITE/Reg' is being assigned into address space '/ps7/Data' at <0x4040_0000 [ 64K ]>.
+Slave segment '/gpio/S_AXI/Reg' is being assigned into address space '/ps7/Data' at <0x4120_0000 [ 64K ]>.
+Slave segment '/iic_hdmi/S_AXI/Reg' is being assigned into address space '/ps7/Data' at <0x4160_0000 [ 64K ]>.
+Slave segment '/vdma/S_AXI_LITE/Reg' is being assigned into address space '/ps7/Data' at <0x4300_0000 [ 64K ]>.
+# set_property offset 0x43C00000 [get_bd_addr_segs {ps7/Data/SEG_vproc_reg0}]
+# set_property range 64K [get_bd_addr_segs {ps7/Data/SEG_vproc_reg0}]
+# validate_bd_design
+WARNING: [BD 41-3281] Instance '/ps7' is connected on both sides by SmartConnects and cannot automatically configure itself to match the endpoints. Please manually configure its AXI interfaces as required for the design.
+WARNING: [BD 41-3281] Instance '/dma' is connected on both sides by SmartConnects and cannot automatically configure itself to match the endpoints. Please manually configure its AXI interfaces as required for the design.
+WARNING: [BD 41-3281] Instance '/vdma' is connected on both sides by SmartConnects and cannot automatically configure itself to match the endpoints. Please manually configure its AXI interfaces as required for the design.
+WARNING: [BD 41-702] Propagation TCL tries to overwrite USER strength parameter C_M_AXI_S2MM_DATA_WIDTH(64) on '/dma' with propagated value(32). Command ignored
+INFO: [BD 5-943] Reserving offset range <0x43C0_0000 [ 64K ]> from slave interface '/ic_ctrl/S00_AXI' to master interface '/ic_ctrl/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x4040_0000 [ 64K ]> from slave interface '/ic_ctrl/S00_AXI' to master interface '/ic_ctrl/M01_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x4300_0000 [ 64K ]> from slave interface '/ic_ctrl/S00_AXI' to master interface '/ic_ctrl/M02_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x4160_0000 [ 64K ]> from slave interface '/ic_ctrl/S00_AXI' to master interface '/ic_ctrl/M03_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x4120_0000 [ 64K ]> from slave interface '/ic_ctrl/S00_AXI' to master interface '/ic_ctrl/M04_AXI'. This will be used by smartconnect on path for routing.
+INFO: [xilinx.com:ip:smartconnect:1.0-1] system_ic_ctrl_0: SmartConnect system_ic_ctrl_0 is in Low-Area Mode.
+INFO: [Ipptcl 7-1463] No Compatible Board Interface found. Board Tab not created in customize GUI
+xit::source_ipfile: Time (s): cpu = 00:00:06 ; elapsed = 00:00:06 . Memory (MB): peak = 1158.625 ; gain = 19.945
+INFO: [BD 5-943] Reserving offset range <0x0000_0000 [ 512M ]> from slave interface '/ic_mem/S00_AXI' to master interface '/ic_mem/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x0000_0000 [ 512M ]> from slave interface '/ic_mem/S01_AXI' to master interface '/ic_mem/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x0000_0000 [ 512M ]> from slave interface '/ic_mem/S02_AXI' to master interface '/ic_mem/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [xilinx.com:ip:smartconnect:1.0-1] system_ic_mem_0: SmartConnect system_ic_mem_0 is in High-performance Mode.
+INFO: [xilinx.com:ip:clk_wiz:6.0-1] /clk_wiz clk_wiz propagate
+validate_bd_design: Time (s): cpu = 00:00:21 ; elapsed = 00:00:22 . Memory (MB): peak = 1220.953 ; gain = 153.074
+# save_bd_design
+Wrote  : <D:\fpga-video\hw\build\video.srcs\sources_1\bd\system\system.bd> 
+# write_bd_tcl -force $rdir/system_bd.tcl
+WARNING: [BD 41-2925] The design that will be created by this Tcl script contains the following module references: vproc_axi, upscale_axi, hdmi_out.
+Please add the sources of those modules before sourcing this Tcl script or use write_project_tcl.
+INFO: [BD 5-148] Tcl file written out <D:/fpga-video/hw/reports/system_bd.tcl>.
+
+# make_wrapper -files [get_files system.bd] -top
+INFO: [BD 41-1662] The design 'system.bd' is already validated. Therefore parameter propagation will not be re-run.
+Verilog Output written to : D:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v
+Verilog Output written to : D:/fpga-video/hw/build/video.gen/sources_1/bd/system/sim/system.v
+Verilog Output written to : D:/fpga-video/hw/build/video.gen/sources_1/bd/system/hdl/system_wrapper.v
+# add_files -norecurse [file join $bdir video.gen sources_1 bd system hdl system_wrapper.v]
+# set_property top system_wrapper [current_fileset]
+# update_compile_order -fileset sources_1
+# if {$stop eq "bd"} { puts "BD_DONE"; exit }
+# set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
+# launch_runs synth_1 -jobs 8
+INFO: [BD 41-1662] The design 'system.bd' is already validated. Therefore parameter propagation will not be re-run.
+Verilog Output written to : D:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v
+Verilog Output written to : D:/fpga-video/hw/build/video.gen/sources_1/bd/system/sim/system.v
+Verilog Output written to : D:/fpga-video/hw/build/video.gen/sources_1/bd/system/hdl/system_wrapper.v
+INFO: [IP_Flow 19-5611] Unable to find an associated reset port for the interface 'M_AXI_GP0'. A default connection has been created.
+INFO: [IP_Flow 19-5611] Unable to find an associated reset port for the interface 'S_AXI_HP0'. A default connection has been created.
+INFO: [BD 41-1029] Generation completed for the IP Integrator block ps7 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block clk_wiz .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block rst_proc .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block rst_pix .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block dma .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block vproc .
+WARNING: [IP_Flow 19-4994] Overwriting existing constraint file 'd:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vdma_0/system_vdma_0_ooc.xdc'
+INFO: [BD 41-1029] Generation completed for the IP Integrator block vdma .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block upscale .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block vtc .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block vid_out .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block u_hdmi .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block iic_hdmi .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block gpio .
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_nodes/s00_ar_node/s_sc_payld'(148) to pin: '/s00_nodes/S_SC_AR_payld'(144) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_nodes/s00_aw_node/s_sc_payld'(148) to pin: '/s00_nodes/S_SC_AW_payld'(144) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_nodes/m00_r_node/s_sc_payld'(55) to pin: '/m00_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_nodes/m00_b_node/s_sc_payld'(9) to pin: '/m00_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_nodes/m01_r_node/s_sc_payld'(55) to pin: '/m01_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_nodes/m01_b_node/s_sc_payld'(9) to pin: '/m01_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_nodes/m02_r_node/s_sc_payld'(55) to pin: '/m02_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_nodes/m02_b_node/s_sc_payld'(9) to pin: '/m02_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_nodes/m03_r_node/s_sc_payld'(55) to pin: '/m03_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_nodes/m03_b_node/s_sc_payld'(9) to pin: '/m03_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_nodes/m04_r_node/s_sc_payld'(55) to pin: '/m04_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_nodes/m04_b_node/s_sc_payld'(9) to pin: '/m04_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_axi2sc/s_sc_r_payld'(53) to pin: '/s00_nodes/M_SC_R_payld'(55) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_axi2sc/s_sc_b_payld'(7) to pin: '/s00_nodes/M_SC_B_payld'(9) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_sc2axi/s_sc_ar_payld'(144) to pin: '/m00_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_sc2axi/s_sc_aw_payld'(144) to pin: '/m00_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_sc2axi/s_sc_ar_payld'(144) to pin: '/m01_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_sc2axi/s_sc_aw_payld'(144) to pin: '/m01_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_sc2axi/s_sc_ar_payld'(144) to pin: '/m02_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_sc2axi/s_sc_aw_payld'(144) to pin: '/m02_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_sc2axi/s_sc_ar_payld'(144) to pin: '/m03_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_sc2axi/s_sc_aw_payld'(144) to pin: '/m03_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_sc2axi/s_sc_ar_payld'(144) to pin: '/m04_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_sc2axi/s_sc_aw_payld'(144) to pin: '/m04_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_nodes/s00_ar_node/s_sc_payld'(148) to pin: '/s00_nodes/S_SC_AR_payld'(144) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_nodes/s00_aw_node/s_sc_payld'(148) to pin: '/s00_nodes/S_SC_AW_payld'(144) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_nodes/m00_r_node/s_sc_payld'(55) to pin: '/m00_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_nodes/m00_b_node/s_sc_payld'(9) to pin: '/m00_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_nodes/m01_r_node/s_sc_payld'(55) to pin: '/m01_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_nodes/m01_b_node/s_sc_payld'(9) to pin: '/m01_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_nodes/m02_r_node/s_sc_payld'(55) to pin: '/m02_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_nodes/m02_b_node/s_sc_payld'(9) to pin: '/m02_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_nodes/m03_r_node/s_sc_payld'(55) to pin: '/m03_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_nodes/m03_b_node/s_sc_payld'(9) to pin: '/m03_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_nodes/m04_r_node/s_sc_payld'(55) to pin: '/m04_nodes/S_SC_R_payld'(53) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_nodes/m04_b_node/s_sc_payld'(9) to pin: '/m04_nodes/S_SC_B_payld'(7) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_axi2sc/s_sc_r_payld'(53) to pin: '/s00_nodes/M_SC_R_payld'(55) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/s00_axi2sc/s_sc_b_payld'(7) to pin: '/s00_nodes/M_SC_B_payld'(9) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_sc2axi/s_sc_ar_payld'(144) to pin: '/m00_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m00_sc2axi/s_sc_aw_payld'(144) to pin: '/m00_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_sc2axi/s_sc_ar_payld'(144) to pin: '/m01_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m01_sc2axi/s_sc_aw_payld'(144) to pin: '/m01_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_sc2axi/s_sc_ar_payld'(144) to pin: '/m02_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m02_sc2axi/s_sc_aw_payld'(144) to pin: '/m02_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_sc2axi/s_sc_ar_payld'(144) to pin: '/m03_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m03_sc2axi/s_sc_aw_payld'(144) to pin: '/m03_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_sc2axi/s_sc_ar_payld'(144) to pin: '/m04_nodes/M_SC_AR_payld'(148) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/m04_sc2axi/s_sc_aw_payld'(144) to pin: '/m04_nodes/M_SC_AW_payld'(148) - Only lower order bits will be connected.
+Exporting to file d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_ctrl_0/bd_0/hw_handoff/system_ic_ctrl_0.hwh
+Generated Hardware Definition File d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_ctrl_0/bd_0/synth/system_ic_ctrl_0.hwdef
+INFO: [BD 41-1029] Generation completed for the IP Integrator block ic_ctrl .
+Exporting to file d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_mem_0/bd_0/hw_handoff/system_ic_mem_0.hwh
+Generated Hardware Definition File d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_mem_0/bd_0/synth/system_ic_mem_0.hwdef
+INFO: [BD 41-1029] Generation completed for the IP Integrator block ic_mem .
+Exporting to file D:/fpga-video/hw/build/video.gen/sources_1/bd/system/hw_handoff/system.hwh
+Generated Hardware Definition File D:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.hwdef
+INFO: [BD 41-3262] Generated VHDL Instantiation Template file d:/fpga-video/hw/build/video.gen/sources_1/bd/system/system.vho
+INFO: [BD 41-3262] Generated Verilog Instantiation Template file d:/fpga-video/hw/build/video.gen/sources_1/bd/system/system.veo
+INFO: [BD 41-3262] Generated System Verilog Instantiation Template file d:/fpga-video/hw/build/video.gen/sources_1/bd/system/system_sv.sveo
+WARNING: [Vivado 12-7122] Auto Incremental Compile:: No reference checkpoint was found in run synth_1. Auto-incremental flow will not be run, the standard flow will be run instead.
+[Thu Oct 22 06:03:00 2026] Launched system_rst_pix_0_synth_1, system_dma_0_synth_1, system_ps7_0_synth_1, system_clk_wiz_0_synth_1, system_rst_proc_0_synth_1, system_upscale_0_synth_1, system_vtc_0_synth_1, system_u_hdmi_0_synth_1, system_gpio_0_synth_1, system_vdma_0_synth_1, system_vid_out_0_synth_1, system_vproc_0_synth_1, system_iic_hdmi_0_synth_1, system_ic_ctrl_0_synth_1, system_ic_mem_0_synth_1...
+Run output will be captured here:
+system_rst_pix_0_synth_1: D:/fpga-video/hw/build/video.runs/system_rst_pix_0_synth_1/runme.log
+system_dma_0_synth_1: D:/fpga-video/hw/build/video.runs/system_dma_0_synth_1/runme.log
+system_ps7_0_synth_1: D:/fpga-video/hw/build/video.runs/system_ps7_0_synth_1/runme.log
+system_clk_wiz_0_synth_1: D:/fpga-video/hw/build/video.runs/system_clk_wiz_0_synth_1/runme.log
+system_rst_proc_0_synth_1: D:/fpga-video/hw/build/video.runs/system_rst_proc_0_synth_1/runme.log
+system_upscale_0_synth_1: D:/fpga-video/hw/build/video.runs/system_upscale_0_synth_1/runme.log
+system_vtc_0_synth_1: D:/fpga-video/hw/build/video.runs/system_vtc_0_synth_1/runme.log
+system_u_hdmi_0_synth_1: D:/fpga-video/hw/build/video.runs/system_u_hdmi_0_synth_1/runme.log
+system_gpio_0_synth_1: D:/fpga-video/hw/build/video.runs/system_gpio_0_synth_1/runme.log
+system_vdma_0_synth_1: D:/fpga-video/hw/build/video.runs/system_vdma_0_synth_1/runme.log
+system_vid_out_0_synth_1: D:/fpga-video/hw/build/video.runs/system_vid_out_0_synth_1/runme.log
+system_vproc_0_synth_1: D:/fpga-video/hw/build/video.runs/system_vproc_0_synth_1/runme.log
+system_iic_hdmi_0_synth_1: D:/fpga-video/hw/build/video.runs/system_iic_hdmi_0_synth_1/runme.log
+system_ic_ctrl_0_synth_1: D:/fpga-video/hw/build/video.runs/system_ic_ctrl_0_synth_1/runme.log
+system_ic_mem_0_synth_1: D:/fpga-video/hw/build/video.runs/system_ic_mem_0_synth_1/runme.log
+[Thu Oct 22 06:03:00 2026] Launched synth_1...
+Run output will be captured here: D:/fpga-video/hw/build/video.runs/synth_1/runme.log
+launch_runs: Time (s): cpu = 00:00:37 ; elapsed = 00:00:45 . Memory (MB): peak = 1315.379 ; gain = 81.242
+# wait_on_run synth_1
+[Thu Oct 22 06:03:00 2026] Waiting for synth_1 to finish...
+
+
+*** Running vivado
+    with args -log system_wrapper.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source system_wrapper.tcl
+
+
+
+****** Vivado v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Thu Oct 22 06:09:27 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source system_wrapper.tcl -notrace
+create_project: Time (s): cpu = 00:00:10 ; elapsed = 00:00:07 . Memory (MB): peak = 663.293 ; gain = 219.004
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/AMDDesignTools/2025.2/Vivado/data/ip'.
+add_files: Time (s): cpu = 00:00:10 ; elapsed = 00:00:11 . Memory (MB): peak = 719.492 ; gain = 56.199
+Command: synth_design -top system_wrapper -part xc7z020clg484-1
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Device 21-403] Loading part xc7z020clg484-1
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 31920
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 1516.027 ; gain = 540.113
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'system_wrapper' [D:/fpga-video/hw/build/video.gen/sources_1/bd/system/hdl/system_wrapper.v:13]
+INFO: [Synth 8-6157] synthesizing module 'IOBUF' [D:/AMDDesignTools/2025.2/Vivado/scripts/rt/data/unisim_comp.v:87566]
+INFO: [Synth 8-6155] done synthesizing module 'IOBUF' (0#1) [D:/AMDDesignTools/2025.2/Vivado/scripts/rt/data/unisim_comp.v:87566]
+INFO: [Synth 8-6157] synthesizing module 'system' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:13]
+INFO: [Synth 8-6157] synthesizing module 'system_clk_wiz_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_clk_wiz_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_clk_wiz_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_clk_wiz_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_dma_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_dma_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_dma_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_dma_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'mm2s_prmry_reset_out_n' of module 'system_dma_0' is unconnected for instance 'dma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:355]
+WARNING: [Synth 8-7071] port 'm_axis_mm2s_tkeep' of module 'system_dma_0' is unconnected for instance 'dma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:355]
+WARNING: [Synth 8-7071] port 's2mm_prmry_reset_out_n' of module 'system_dma_0' is unconnected for instance 'dma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:355]
+WARNING: [Synth 8-7071] port 'mm2s_introut' of module 'system_dma_0' is unconnected for instance 'dma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:355]
+WARNING: [Synth 8-7071] port 's2mm_introut' of module 'system_dma_0' is unconnected for instance 'dma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:355]
+WARNING: [Synth 8-7071] port 'axi_dma_tstvec' of module 'system_dma_0' is unconnected for instance 'dma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:355]
+WARNING: [Synth 8-7023] instance 'dma' of module 'system_dma_0' has 64 connections declared, but only 58 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:355]
+INFO: [Synth 8-6157] synthesizing module 'system_gpio_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_gpio_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_gpio_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_gpio_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_ic_ctrl_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_ic_ctrl_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_ic_ctrl_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_ic_ctrl_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'M00_AXI_awprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M00_AXI_arprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M01_AXI_awprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M01_AXI_wstrb' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M01_AXI_arprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M02_AXI_awprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M02_AXI_wstrb' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M02_AXI_arprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M03_AXI_awprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M03_AXI_arprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M04_AXI_awprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7071] port 'M04_AXI_arprot' of module 'system_ic_ctrl_0' is unconnected for instance 'ic_ctrl' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+WARNING: [Synth 8-7023] instance 'ic_ctrl' of module 'system_ic_ctrl_0' has 135 connections declared, but only 123 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:435]
+INFO: [Synth 8-6157] synthesizing module 'system_ic_mem_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_ic_mem_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_ic_mem_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_ic_mem_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_iic_hdmi_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_iic_hdmi_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_iic_hdmi_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_iic_hdmi_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'iic2intc_irpt' of module 'system_iic_hdmi_0' is unconnected for instance 'iic_hdmi' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:643]
+WARNING: [Synth 8-7071] port 'gpo' of module 'system_iic_hdmi_0' is unconnected for instance 'iic_hdmi' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:643]
+WARNING: [Synth 8-7023] instance 'iic_hdmi' of module 'system_iic_hdmi_0' has 27 connections declared, but only 25 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:643]
+INFO: [Synth 8-6157] synthesizing module 'system_ps7_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_ps7_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_ps7_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_ps7_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'TTC0_WAVE0_OUT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'TTC0_WAVE1_OUT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'TTC0_WAVE2_OUT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'USB0_PORT_INDCTL' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'USB0_VBUS_PWRSELECT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'S_AXI_HP0_BID' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'S_AXI_HP0_RID' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'S_AXI_HP0_RCOUNT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'S_AXI_HP0_WCOUNT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'S_AXI_HP0_RACOUNT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7071] port 'S_AXI_HP0_WACOUNT' of module 'system_ps7_0' is unconnected for instance 'ps7' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+WARNING: [Synth 8-7023] instance 'ps7' of module 'system_ps7_0' has 113 connections declared, but only 102 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:669]
+INFO: [Synth 8-6157] synthesizing module 'system_rst_pix_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_rst_pix_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_rst_pix_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_rst_pix_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'mb_reset' of module 'system_rst_pix_0' is unconnected for instance 'rst_pix' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:772]
+WARNING: [Synth 8-7071] port 'bus_struct_reset' of module 'system_rst_pix_0' is unconnected for instance 'rst_pix' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:772]
+WARNING: [Synth 8-7071] port 'interconnect_aresetn' of module 'system_rst_pix_0' is unconnected for instance 'rst_pix' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:772]
+WARNING: [Synth 8-7023] instance 'rst_pix' of module 'system_rst_pix_0' has 10 connections declared, but only 7 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:772]
+INFO: [Synth 8-6157] synthesizing module 'system_rst_proc_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_rst_proc_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_rst_proc_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_rst_proc_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'mb_reset' of module 'system_rst_proc_0' is unconnected for instance 'rst_proc' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:780]
+WARNING: [Synth 8-7071] port 'bus_struct_reset' of module 'system_rst_proc_0' is unconnected for instance 'rst_proc' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:780]
+WARNING: [Synth 8-7071] port 'peripheral_reset' of module 'system_rst_proc_0' is unconnected for instance 'rst_proc' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:780]
+WARNING: [Synth 8-7071] port 'interconnect_aresetn' of module 'system_rst_proc_0' is unconnected for instance 'rst_proc' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:780]
+WARNING: [Synth 8-7023] instance 'rst_proc' of module 'system_rst_proc_0' has 10 connections declared, but only 6 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:780]
+INFO: [Synth 8-6157] synthesizing module 'system_u_hdmi_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_u_hdmi_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_u_hdmi_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_u_hdmi_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_upscale_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_upscale_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_upscale_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_upscale_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_vdma_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vdma_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_vdma_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vdma_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'mm2s_frame_ptr_out' of module 'system_vdma_0' is unconnected for instance 'vdma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:813]
+WARNING: [Synth 8-7071] port 'm_axis_mm2s_tkeep' of module 'system_vdma_0' is unconnected for instance 'vdma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:813]
+WARNING: [Synth 8-7071] port 'mm2s_introut' of module 'system_vdma_0' is unconnected for instance 'vdma' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:813]
+WARNING: [Synth 8-7023] instance 'vdma' of module 'system_vdma_0' has 42 connections declared, but only 39 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:813]
+INFO: [Synth 8-6157] synthesizing module 'system_vid_out_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vid_out_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_vid_out_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vid_out_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'vid_vblank' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'vid_hblank' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'vid_field_id' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'locked' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'overflow' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'underflow' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'fifo_read_level' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'status' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7071] port 'sof_state_out' of module 'system_vid_out_0' is unconnected for instance 'vid_out' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+WARNING: [Synth 8-7023] instance 'vid_out' of module 'system_vid_out_0' has 32 connections declared, but only 23 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:853]
+INFO: [Synth 8-6157] synthesizing module 'system_vproc_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vproc_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_vproc_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vproc_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'system_vtc_0' [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vtc_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'system_vtc_0' (0#1) [D:/fpga-video/hw/build/video.runs/synth_1/.Xil/Vivado-32836-Batu/realtime/system_vtc_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'fsync_out' of module 'system_vtc_0' is unconnected for instance 'vtc' [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:905]
+WARNING: [Synth 8-7023] instance 'vtc' of module 'system_vtc_0' has 11 connections declared, but only 10 given [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:905]
+INFO: [Synth 8-6155] done synthesizing module 'system' (0#1) [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/synth/system.v:13]
+INFO: [Synth 8-6155] done synthesizing module 'system_wrapper' (0#1) [D:/fpga-video/hw/build/video.gen/sources_1/bd/system/hdl/system_wrapper.v:13]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 1646.559 ; gain = 670.645
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 1646.559 ; gain = 670.645
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 1646.559 ; gain = 670.645
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.027 . Memory (MB): peak = 1646.559 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 2 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ps7_0/system_ps7_0/system_ps7_0_in_context.xdc] for cell 'system_i/ps7'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ps7_0/system_ps7_0/system_ps7_0_in_context.xdc] for cell 'system_i/ps7'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_clk_wiz_0/system_clk_wiz_0/system_clk_wiz_0_in_context.xdc] for cell 'system_i/clk_wiz'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_clk_wiz_0/system_clk_wiz_0/system_clk_wiz_0_in_context.xdc] for cell 'system_i/clk_wiz'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_rst_proc_0/system_rst_proc_0/system_rst_proc_0_in_context.xdc] for cell 'system_i/rst_proc'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_rst_proc_0/system_rst_proc_0/system_rst_proc_0_in_context.xdc] for cell 'system_i/rst_proc'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_rst_pix_0/system_rst_pix_0/system_rst_pix_0_in_context.xdc] for cell 'system_i/rst_pix'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_rst_pix_0/system_rst_pix_0/system_rst_pix_0_in_context.xdc] for cell 'system_i/rst_pix'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_dma_0/system_dma_0/system_dma_0_in_context.xdc] for cell 'system_i/dma'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_dma_0/system_dma_0/system_dma_0_in_context.xdc] for cell 'system_i/dma'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vproc_0/system_vproc_0/system_vproc_0_in_context.xdc] for cell 'system_i/vproc'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vproc_0/system_vproc_0/system_vproc_0_in_context.xdc] for cell 'system_i/vproc'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vdma_0/system_vdma_0/system_vdma_0_in_context.xdc] for cell 'system_i/vdma'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vdma_0/system_vdma_0/system_vdma_0_in_context.xdc] for cell 'system_i/vdma'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_upscale_0/system_upscale_0/system_upscale_0_in_context.xdc] for cell 'system_i/upscale'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_upscale_0/system_upscale_0/system_upscale_0_in_context.xdc] for cell 'system_i/upscale'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vtc_0/system_vtc_0/system_vtc_0_in_context.xdc] for cell 'system_i/vtc'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vtc_0/system_vtc_0/system_vtc_0_in_context.xdc] for cell 'system_i/vtc'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vid_out_0/system_vid_out_0/system_vid_out_0_in_context.xdc] for cell 'system_i/vid_out'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vid_out_0/system_vid_out_0/system_vid_out_0_in_context.xdc] for cell 'system_i/vid_out'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_u_hdmi_0/system_u_hdmi_0/system_u_hdmi_0_in_context.xdc] for cell 'system_i/u_hdmi'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_u_hdmi_0/system_u_hdmi_0/system_u_hdmi_0_in_context.xdc] for cell 'system_i/u_hdmi'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_iic_hdmi_0/system_iic_hdmi_0/system_iic_hdmi_0_in_context.xdc] for cell 'system_i/iic_hdmi'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_iic_hdmi_0/system_iic_hdmi_0/system_iic_hdmi_0_in_context.xdc] for cell 'system_i/iic_hdmi'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_gpio_0/system_gpio_0/system_gpio_0_in_context.xdc] for cell 'system_i/gpio'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_gpio_0/system_gpio_0/system_gpio_0_in_context.xdc] for cell 'system_i/gpio'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_ctrl_0/system_ic_ctrl_0/system_ic_ctrl_0_in_context.xdc] for cell 'system_i/ic_ctrl'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_ctrl_0/system_ic_ctrl_0/system_ic_ctrl_0_in_context.xdc] for cell 'system_i/ic_ctrl'
+Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_mem_0/system_ic_mem_0/system_ic_mem_0_in_context.xdc] for cell 'system_i/ic_mem'
+Finished Parsing XDC File [d:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_ic_mem_0/system_ic_mem_0/system_ic_mem_0_in_context.xdc] for cell 'system_i/ic_mem'
+Parsing XDC File [D:/fpga-video/hw/zedboard_video.xdc]
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hierarchical -filter {NAME =~ *u_hdmi*hd_d_reg*}'. [D:/fpga-video/hw/zedboard_video.xdc:25]
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hierarchical -filter {NAME =~ *u_hdmi*hd_*sync_reg}'. [D:/fpga-video/hw/zedboard_video.xdc:26]
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hierarchical -filter {NAME =~ *u_hdmi*hd_de_reg}'. [D:/fpga-video/hw/zedboard_video.xdc:27]
+WARNING: [Vivado 12-180] No cells matched 'get_cells -hierarchical -filter {NAME =~ *u_hdmi*ctrl_q1_reg*}'. [D:/fpga-video/hw/zedboard_video.xdc:36]
+Finished Parsing XDC File [D:/fpga-video/hw/zedboard_video.xdc]
+WARNING: [Project 1-498] One or more constraints failed evaluation while reading constraint file [D:/fpga-video/hw/zedboard_video.xdc] and the design contains unresolved black boxes. These constraints will be read post-synthesis (as long as their source constraint file is marked as used_in_implementation) and should be applied correctly then. You should review the constraints listed in the file [.Xil/system_wrapper_propImpl.xdc] and check the run log file to verify that these constraints were correctly applied.
+INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [D:/fpga-video/hw/zedboard_video.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/system_wrapper_propImpl.xdc].
+Resolution: To avoid this warning, move constraints listed in [.Xil/system_wrapper_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
+Parsing XDC File [D:/fpga-video/hw/build/video.runs/synth_1/dont_touch.xdc]
+Finished Parsing XDC File [D:/fpga-video/hw/build/video.runs/synth_1/dont_touch.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 1664.379 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 2 instances
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.026 . Memory (MB): peak = 1664.379 ; gain = 0.000
+WARNING: [Timing 38-316] Clock period '10.000' specified during out-of-context synthesis of instance 'system_i/gpio' at clock pin 's_axi_aclk' is different from the actual clock period '6.734', this can lead to different synthesis results.
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:23 ; elapsed = 00:00:25 . Memory (MB): peak = 1664.793 ; gain = 688.879
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7z020clg484-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:23 ; elapsed = 00:00:25 . Memory (MB): peak = 1664.793 ; gain = 688.879
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:24 ; elapsed = 00:00:25 . Memory (MB): peak = 1664.793 ; gain = 688.879
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:24 ; elapsed = 00:00:26 . Memory (MB): peak = 1664.793 ; gain = 688.879
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 220 (col length:60)
+BRAMs: 280 (col length: RAMB18 60 RAMB36 30)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:27 ; elapsed = 00:00:29 . Memory (MB): peak = 1664.793 ; gain = 688.879
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:35 ; elapsed = 00:00:37 . Memory (MB): peak = 1829.852 ; gain = 853.938
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:35 ; elapsed = 00:00:37 . Memory (MB): peak = 1830.371 ; gain = 854.457
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:35 ; elapsed = 00:00:37 . Memory (MB): peak = 1841.078 ; gain = 865.164
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++------+------------------+----------+
+|      |BlackBox name     |Instances |
++------+------------------+----------+
+|1     |system_clk_wiz_0  |         1|
+|2     |system_dma_0      |         1|
+|3     |system_gpio_0     |         1|
+|4     |system_ic_ctrl_0  |         1|
+|5     |system_ic_mem_0   |         1|
+|6     |system_iic_hdmi_0 |         1|
+|7     |system_ps7_0      |         1|
+|8     |system_rst_pix_0  |         1|
+|9     |system_rst_proc_0 |         1|
+|10    |system_u_hdmi_0   |         1|
+|11    |system_upscale_0  |         1|
+|12    |system_vdma_0     |         1|
+|13    |system_vid_out_0  |         1|
+|14    |system_vproc_0    |         1|
+|15    |system_vtc_0      |         1|
++------+------------------+----------+
+
+Report Cell Usage: 
++------+----------------+------+
+|      |Cell            |Count |
++------+----------------+------+
+|1     |system_clk_wiz  |     1|
+|2     |system_dma      |     1|
+|3     |system_gpio     |     1|
+|4     |system_ic_ctrl  |     1|
+|5     |system_ic_mem   |     1|
+|6     |system_iic_hdmi |     1|
+|7     |system_ps7      |     1|
+|8     |system_rst_pix  |     1|
+|9     |system_rst_proc |     1|
+|10    |system_u_hdmi   |     1|
+|11    |system_upscale  |     1|
+|12    |system_vdma     |     1|
+|13    |system_vid_out  |     1|
+|14    |system_vproc    |     1|
+|15    |system_vtc      |     1|
+|16    |IOBUF           |     2|
+|17    |OBUF            |    24|
++------+----------------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:41 ; elapsed = 00:00:43 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 0 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:26 ; elapsed = 00:00:39 . Memory (MB): peak = 2089.457 ; gain = 1095.309
+Synthesis Optimization Complete : Time (s): cpu = 00:00:41 ; elapsed = 00:00:44 . Memory (MB): peak = 2089.457 ; gain = 1113.543
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.029 . Memory (MB): peak = 2089.457 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 2 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2102.250 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2 instances were transformed.
+  IOBUF => IOBUF (IBUF, OBUFT): 2 instances
+
+Synth Design complete | Checksum: ef483ac
+INFO: [Common 17-83] Releasing license: Synthesis
+56 Infos, 66 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:48 ; elapsed = 00:00:54 . Memory (MB): peak = 2102.250 ; gain = 1382.758
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 2102.250 ; gain = 0.000
+INFO: [Common 17-1381] The checkpoint 'D:/fpga-video/hw/build/video.runs/synth_1/system_wrapper.dcp' has been generated.
+INFO: [Vivado 12-24828] Executing command : report_utilization -file system_wrapper_utilization_synth.rpt -pb system_wrapper_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Thu Oct 22 06:10:46 2026...
+[Thu Oct 22 06:10:49 2026] synth_1 finished
+wait_on_runs: Time (s): cpu = 00:00:03 ; elapsed = 00:07:49 . Memory (MB): peak = 1315.379 ; gain = 0.000
+# if {[get_property PROGRESS [get_runs synth_1]] ne "100%"} { error "synthesis failed" }
+# launch_runs impl_1 -to_step write_bitstream -jobs 8
+[Thu Oct 22 06:10:53 2026] Launched impl_1...
+Run output will be captured here: D:/fpga-video/hw/build/video.runs/impl_1/runme.log
+# wait_on_run impl_1
+[Thu Oct 22 06:10:53 2026] Waiting for impl_1 to finish...
+
+
+*** Running vivado
+    with args -log system_wrapper.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source system_wrapper.tcl -notrace
+
+
+
+****** Vivado v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Thu Oct 22 06:11:00 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source system_wrapper.tcl -notrace
+create_project: Time (s): cpu = 00:00:10 ; elapsed = 00:00:07 . Memory (MB): peak = 660.250 ; gain = 216.969
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/AMDDesignTools/2025.2/Vivado/data/ip'.
+WARNING: [IP_Flow 19-3664] IP 'system_vproc_0' generated file not found 'd:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vproc_0/system_vproc_0.dcp'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'system_vproc_0' generated file not found 'd:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vproc_0/system_vproc_0_sim_netlist.vhdl'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'system_vproc_0' generated file not found 'd:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vproc_0/system_vproc_0_sim_netlist.v'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'system_vproc_0' generated file not found 'd:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vproc_0/system_vproc_0_stub.vhdl'. Please regenerate to continue.
+WARNING: [IP_Flow 19-3664] IP 'system_vproc_0' generated file not found 'd:/fpga-video/hw/build/video.gen/sources_1/bd/system/ip/system_vproc_0/system_vproc_0_stub.v'. Please regenerate to continue.
